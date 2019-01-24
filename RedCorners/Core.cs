@@ -10,6 +10,7 @@ using System.Net.Security;
 using System.Security.Authentication;
 //using Newtonsoft.Json;
 using SimpleJSON;
+using System.Threading.Tasks;
 
 namespace RedCorners
 {
@@ -192,7 +193,7 @@ namespace RedCorners
 
         public static byte[] GetPayload(string path, long startbyte=0, int? psize=null)
         {
-            int size = psize.HasValue ? psize.Value : -1;
+            int size = psize ?? -1;
             var fi = new FileInfo(path);
             FileStream sr = fi.OpenRead();
             sr.Seek(startbyte, SeekOrigin.Begin);
@@ -313,42 +314,21 @@ namespace RedCorners
             }
             return results;
         }
-
-        public static string HTTPFetch(string url, string method,
-            WebHeaderCollection headers, Dictionary<string, object> payload,
-            string contentType = "application/x-www-form-urlencoded",
-            string requestAccept = null, string host = null)
-        {
-            string[] responseFields;
-            return HTTPFetch(url, method, headers, payload, out responseFields, contentType, requestAccept, host);
-        }
-
-        public static string HTTPFetch(string url, string method,
-            WebHeaderCollection headers, Dictionary<string, object> payload,
-            out string[] responseFields, 
-            string contentType = "application/x-www-form-urlencoded",
-            string requestAccept = null, 
-            string host = null)
-        {
-            return HTTPFetch(url, method, headers,
-                KeyValueToString(payload), out responseFields, contentType, requestAccept, host);
-        }
-
-        public static string HTTPFetch(string url, string method,
+        
+        public static async Task<HTTPFetchResponse> HTTPFetchAsync(string url, string method,
             WebHeaderCollection headers, 
-            string payload,
+            Dictionary<string, object> payload,
             string contentType = "application/x-www-form-urlencoded",
             string requestAccept = null, 
             string host = null)
         {
-            string[] responseFields;
-            return HTTPFetch(url, method, headers, payload, out responseFields, contentType, requestAccept, host);
+            return await HTTPFetchAsync(url, method, headers,
+                KeyValueToString(payload), contentType, requestAccept, host);
         }
-
-        public static string HTTPFetch(string url, string method,
+        
+        public static async Task<HTTPFetchResponse> HTTPFetchAsync(string url, string method,
             WebHeaderCollection headers, 
             string payload, 
-            out string[] responseFields,
             string contentType = "application/x-www-form-urlencoded",
             string requestAccept = null, 
             string host = null)
@@ -360,81 +340,130 @@ namespace RedCorners
                 streamBytes = ToByteArray(payload);
                 contentLength = streamBytes.Length;
             }
-            return HTTPFetch(url, method, headers, streamBytes, contentLength, out responseFields,
+            return await HTTPFetchAsync(url, method, headers, streamBytes, contentLength,
                 contentType, requestAccept, host);
         }
         
-        public static string HTTPFetch(string url, string method,
+        public class HTTPFetchResponse
+        {
+            public string Text { get; set; }
+            public string[] Fields { get; set; }
+
+            public static implicit operator string(HTTPFetchResponse r)
+            {
+                return r?.Text;
+            }
+        }
+
+        public static async Task<HTTPFetchResponse> HTTPFetchAsync(string url, string method,
             WebHeaderCollection headers, 
             byte[] streamBytes, 
             int contentLength, 
-            out string[] responseFields,
             string contentType = "application/x-www-form-urlencoded",
             string requestAccept = null, 
             string host = null)
         {
+            var response = new HTTPFetchResponse();
+
             _active = true;
             try
             {
-                var uri = new Uri(url);
-                if (EndpointCallback != null) EndpointCallback(uri.AbsolutePath);
-                if (string.IsNullOrEmpty(host)) host = uri.Host;
-
-                string reqStr =
-                    String.Format("{0} {1} HTTP/1.1\r\n", method, url) +
-                    String.Format("Host: {0}\r\n", host) +
-                    String.Format("Connection: Close\r\n");
-
-                if (!IsNullOrWhiteSpace(requestAccept))
-                    reqStr += String.Format("Accept: {0}\r\n", requestAccept);
-                if (contentType != null)
-                    reqStr += String.Format("Content-Type: {0}\r\n", contentType);
-
-                if (headers != null)
+                await Task.Run(() =>
                 {
-                    for (int i = 0; i < headers.Count; ++i)
+                    var uri = new Uri(url);
+                    EndpointCallback?.Invoke(uri.AbsolutePath);
+                    if (string.IsNullOrEmpty(host)) host = uri.Host;
+
+                    string reqStr =
+                        String.Format("{0} {1} HTTP/1.1\r\n", method, url) +
+                        String.Format("Host: {0}\r\n", host) +
+                        String.Format("Connection: Close\r\n");
+
+                    if (!IsNullOrWhiteSpace(requestAccept))
+                        reqStr += String.Format("Accept: {0}\r\n", requestAccept);
+                    if (contentType != null)
+                        reqStr += String.Format("Content-Type: {0}\r\n", contentType);
+
+                    if (headers != null)
                     {
-                        string header = headers.GetKey(i);
-                        foreach (string value in headers.GetValues(i))
+                        for (int i = 0; i < headers.Count; ++i)
                         {
-                            reqStr += String.Format("{0}: {1}\r\n", header, value);
+                            string header = headers.GetKey(i);
+                            foreach (string value in headers.GetValues(i))
+                            {
+                                reqStr += String.Format("{0}: {1}\r\n", header, value);
+                            }
                         }
                     }
-                }
 
-                reqStr += String.Format("Content-Length: {0}\r\n", contentLength);
-                reqStr += "\r\n";
-                byte[] headerBytes = ToByteArray(reqStr);
+                    reqStr += String.Format("Content-Length: {0}\r\n", contentLength);
+                    reqStr += "\r\n";
+                    byte[] headerBytes = ToByteArray(reqStr);
 
-                byte[] finalBytes = headerBytes;
-                if (contentLength > 0)
-                {
-                    var requestBytes = new byte[headerBytes.Length + contentLength];
-                    Buffer.BlockCopy(headerBytes, 0, requestBytes, 0, headerBytes.Length);
-                    Buffer.BlockCopy(streamBytes, 0, requestBytes, headerBytes.Length, contentLength);
-                    finalBytes = requestBytes;
-                }
-
-                string responseFromServer = "";
-                responseFields = new string[] { };
-                var tcpClient = new TcpClient();
-                string responseStr = "";
-                int responseLength = 0;
-
-                if (url.ToLower().StartsWith("https"))
-                {
-                    //HTTPS
-                    tcpClient.Connect(uri.Host, 443);
-                    ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback((sender, certificate, chain, policyErrors) => true);
-
-                    //This has a bug on mono: Message	"The authentication or decryption has failed."
-                    //Therefore unfortunately we have to ignore certificates.
-                    using (var s = new SslStream(tcpClient.GetStream(), false,
-                        new RemoteCertificateValidationCallback((sender, certificate, chain, policyErrors) => true)))
+                    byte[] finalBytes = headerBytes;
+                    if (contentLength > 0)
                     {
-                        s.AuthenticateAsClient(uri.Host, null, SslProtocols.Tls, false);
+                        var requestBytes = new byte[headerBytes.Length + contentLength];
+                        Buffer.BlockCopy(headerBytes, 0, requestBytes, 0, headerBytes.Length);
+                        Buffer.BlockCopy(streamBytes, 0, requestBytes, headerBytes.Length, contentLength);
+                        finalBytes = requestBytes;
+                    }
+
+                    string responseFromServer = "";
+                    response.Fields = new string[] { };
+                    var tcpClient = new TcpClient();
+                    string responseStr = "";
+                    int responseLength = 0;
+
+                    if (url.ToLower().StartsWith("https"))
+                    {
+                        //HTTPS
+                        tcpClient.Connect(uri.Host, 443);
+                        ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback((sender, certificate, chain, policyErrors) => true);
+
+                        //This has a bug on mono: Message	"The authentication or decryption has failed."
+                        //Therefore unfortunately we have to ignore certificates.
+                        using (var s = new SslStream(tcpClient.GetStream(), false,
+                            new RemoteCertificateValidationCallback((sender, certificate, chain, policyErrors) => true)))
+                        {
+                            s.AuthenticateAsClient(uri.Host, null, SslProtocols.Tls, false);
+                            if (UpstreamCallback != null && UpstreamCallbackRate > 0)
+                            {
+                                int i = 0;
+                                while (i < finalBytes.Length)
+                                {
+                                    if (!_active) throw new Exception("Halt");
+                                    if (i + _upstreamCallbackRate > finalBytes.Length)
+                                    {
+                                        s.Write(finalBytes, i, finalBytes.Length - i);
+                                        UpstreamCallback(contentLength, contentLength);
+                                        break;
+                                    }
+                                    s.Write(finalBytes, i, (int)_upstreamCallbackRate);
+                                    i += (int)_upstreamCallbackRate;
+                                    UpstreamCallback(Math.Min(i, contentLength), contentLength);
+                                }
+                            }
+                            else s.Write(finalBytes, 0, finalBytes.Length);
+                            s.Flush();
+
+                            while (true)
+                            {
+                                var responseBytes = new byte[8192];
+                                int i = s.Read(responseBytes, 0, responseBytes.Length);
+                                if (i == 0) break;
+                                responseStr += Encoding.UTF8.GetString(responseBytes, 0, i);
+                                responseLength += i;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //HTTP
+                        tcpClient.Connect(uri.Host, 80);
                         if (UpstreamCallback != null && UpstreamCallbackRate > 0)
                         {
+                            var s = tcpClient.GetStream();
                             int i = 0;
                             while (i < finalBytes.Length)
                             {
@@ -450,78 +479,48 @@ namespace RedCorners
                                 UpstreamCallback(Math.Min(i, contentLength), contentLength);
                             }
                         }
-                        else s.Write(finalBytes, 0, finalBytes.Length);
-                        s.Flush();
+                        else tcpClient.Client.Send(finalBytes);
 
                         while (true)
                         {
                             var responseBytes = new byte[8192];
-                            int i = s.Read(responseBytes, 0, responseBytes.Length);
+                            var i = tcpClient.Client.Receive(responseBytes);
                             if (i == 0) break;
                             responseStr += Encoding.UTF8.GetString(responseBytes, 0, i);
                             responseLength += i;
                         }
                     }
-                }
-                else
-                {
-                    //HTTP
-                    tcpClient.Connect(uri.Host, 80);
-                    if (UpstreamCallback != null && UpstreamCallbackRate > 0)
+
+                    tcpClient.Close();
+
+                    var bodyPos = responseStr.IndexOf("\r\n\r\n");
+                    if (bodyPos >= 0)
                     {
-                        var s = tcpClient.GetStream();
-                        int i = 0;
-                        while (i < finalBytes.Length)
-                        {
-							if (!_active) throw new Exception("Halt");
-                            if (i + _upstreamCallbackRate > finalBytes.Length)
-                            {
-                                s.Write(finalBytes, i, finalBytes.Length - i);
-                                UpstreamCallback(contentLength, contentLength);
-                                break;
-                            }
-                            s.Write(finalBytes, i, (int)_upstreamCallbackRate);
-                            i += (int)_upstreamCallbackRate;
-                            UpstreamCallback(Math.Min(i, contentLength), contentLength);
-                        }
+                        response.Fields = responseStr.Substring(0, bodyPos).Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        bodyPos += 4;
+                        responseFromServer = responseStr.Substring(bodyPos, responseStr.Length - bodyPos);
                     }
-                    else tcpClient.Client.Send(finalBytes);
 
-                    while (true)
+                    Debug.WriteLine(String.Format("Response from URL {0}:", url), "HTTPFetch");
+                    Debug.WriteLine(responseFromServer, "HTTPFetch");
+
+                    if (VerboseCallback != null)
                     {
-                        var responseBytes = new byte[8192];
-                        int i = tcpClient.Client.Receive(responseBytes);
-                        if (i == 0) break;
-                        responseStr += Encoding.UTF8.GetString(responseBytes, 0, i);
-                        responseLength += i;
+                        VerboseCallback(String.Format("Response from URL {0}:", url));
+                        VerboseCallback(responseFromServer);
                     }
-                }
 
-                tcpClient.Close();
-
-                var bodyPos = responseStr.IndexOf("\r\n\r\n");
-                if (bodyPos >= 0)
-                {
-                    responseFields = responseStr.Substring(0, bodyPos).Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-                    bodyPos += 4;
-                    responseFromServer = responseStr.Substring(bodyPos, responseStr.Length - bodyPos);
-                }
-
-                Debug.WriteLine(String.Format("Response from URL {0}:", url), "HTTPFetch");
-                Debug.WriteLine(responseFromServer, "HTTPFetch");
-
-                if (VerboseCallback != null)
-                {
-                    VerboseCallback(String.Format("Response from URL {0}:", url));
-                    VerboseCallback(responseFromServer);
-                }
-
-                return responseFromServer;
+                    response.Text = responseFromServer;
+                });
+                return response;
             }
             catch (Exception e)
             {
-                _active = false;
                 throw e;
+            }
+            finally
+            {
+                _active = false;
             }
         }
 
@@ -539,36 +538,32 @@ namespace RedCorners
             return result;
         }
 
-        public static string RequestRaw(
+        public static async Task<HTTPFetchResponse> RequestRawAsync(
             string url,
             string method,
             bool jsonBody,
             string body,
-            WebHeaderCollection headers,
-            out string[] responseHeaders)
+            WebHeaderCollection headers)
         {
             string contentType = "application/x-www-form-urlencoded";
             if (jsonBody) contentType = "application/json; charset=utf-8";
             if (string.IsNullOrEmpty(body)) contentType = null;
             method = method.ToUpper();
-            return Core.HTTPFetch(url, method, headers, body,
-                out responseHeaders, contentType, requestAccept: null, host: null);
+            return await HTTPFetchAsync(url, method, headers, body, contentType, requestAccept: null, host: null);
         }
 
-        public static string RequestRaw(
+        public static async Task<HTTPFetchResponse> RequestRawAsync(
             string url,
             string method,
             bool jsonBody,
             Dictionary<string, object> body,
-            WebHeaderCollection headers,
-            out string[] responseHeaders)
+            WebHeaderCollection headers)
         {
             string contentType = "application/x-www-form-urlencoded";
             if (jsonBody) contentType = "application/json; charset=utf-8";
             if (body == null) contentType = null;
             method = method.ToUpper();
-            return Core.HTTPFetch(url, method, headers, body,
-                out responseHeaders, contentType, requestAccept: null, host: null);
+            return await HTTPFetchAsync(url, method, headers, body, contentType, requestAccept: null, host: null);
         }
     }
 }

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 using SimpleJSON;
+using static RedCorners.Core;
 
 namespace RedCorners.Vimeo
 {
@@ -43,12 +45,12 @@ namespace RedCorners.Vimeo
         //public 
         string TokenType { get; set; }
 
-        void loadAccessData()
+        async Task LoadAccessDataAsync()
         {
             AccessToken = AccessJson["access_token"].Value;
             Scope = AccessJson["scope"].Value.Split(' ');
             TokenType = AccessJson["token_type"].Value;
-            User = Request("/me", null, "GET");
+            User = await RequestAsync("/me", null, "GET");
         }
 
         /// <summary>
@@ -71,7 +73,7 @@ namespace RedCorners.Vimeo
         /// <param name="redirect">The redirect URI for the app (see note)</param>
         /// <param name="apiRoot">The root url of the API being used (in OldVimeoClient, accessible via config['apiroot'])</param>
         /// <returns>Access Token JSON. result["access_token"] contains access token in string</returns>
-        static JSONNode GetAccessToken(
+        static async Task<JSONNode> GetAccessTokenAsync(
             string authCode, string clientId, string secret, string redirect, string apiRoot = "https://api.vimeo.com")
         {
             string encoded = Core.ToBase64(String.Format("{0}:{1}", clientId, secret));
@@ -87,17 +89,16 @@ namespace RedCorners.Vimeo
             {
                 {"Authorization", String.Format("Basic {0}", encoded)}
             };
-
-            string[] responseHeaders;
-            var response = Core.HTTPFetch(
+            
+            var response = await HTTPFetchAsync(
                 String.Format("{0}/oauth/access_token", apiRoot),
-                "POST", headers, payload, out responseHeaders);
+                "POST", headers, payload);
 
-            if (VerboseCallback != null) VerboseCallback(response);
+            VerboseCallback?.Invoke(response);
             return JSON.Parse(response);
         }
         
-        public static string GetClientCredentials(string clientId, string clientSecret, string scopes = null, string apiRoot = "https://api.vimeo.com")
+        public static async Task<string> GetClientCredentialsAsync(string clientId, string clientSecret, string scopes = null, string apiRoot = "https://api.vimeo.com")
         {
             var basicAuth = Core.ToBase64(string.Format("{0}:{1}", clientId, clientSecret));
             var payload = new Dictionary<string, object>
@@ -110,15 +111,14 @@ namespace RedCorners.Vimeo
                 {"Authorization", String.Format("Basic {0}", basicAuth)}
             };
             if (scopes != null) payload.Add("scope", scopes);
-            string[] responseHeaders;
-            var response = Core.HTTPFetch(String.Format("{0}/oauth/authorize/client", apiRoot),
-                "POST", headers, payload, out responseHeaders);
+            var response = await HTTPFetchAsync(String.Format("{0}/oauth/authorize/client", apiRoot),
+                "POST", headers, payload);
 
             var json = JSON.Parse(response);
             return json["access_token"];
         }
         
-        public static VimeoHook Authorize(
+        public static async Task<VimeoHook> AuthorizeAsync(
         string authCode,
         string clientId,
         string secret,
@@ -129,13 +129,13 @@ namespace RedCorners.Vimeo
             vc.clientId = clientId;
             vc.apiRoot = apiRoot;
             vc.redirect = redirect;
-            vc.AccessJson = GetAccessToken(authCode, clientId, secret, redirect, apiRoot);
-            vc.loadAccessData();
+            vc.AccessJson = await GetAccessTokenAsync(authCode, clientId, secret, redirect, apiRoot);
+            await vc.LoadAccessDataAsync();
 
             return vc;
         }
         
-        public static VimeoHook ReAuthorize(
+        public static async Task<VimeoHook> ReAuthorizeAsync(
             string accessToken,
             string clientId,
             string redirect="",
@@ -146,7 +146,7 @@ namespace RedCorners.Vimeo
             vc.redirect = redirect;
             vc.AccessToken = accessToken;
             vc.apiRoot = apiRoot;
-            vc.User = vc.Request("/me", null, "GET");
+            vc.User = await vc.RequestAsync("/me", null, "GET");
             if (vc.User["error"].Value.Length > 0) throw new Exception(vc.User["error"]);
 
             return vc;
@@ -185,7 +185,7 @@ namespace RedCorners.Vimeo
         /// <param name="method">HTTP method: e.g. "GET", "POST", "PUT", etc.</param>
         /// <param name="jsonBody">true: set content type to json</param>
         /// <returns>Deserialized JSON as Dictionary of strings to objects</returns>
-        public JSONNode Request(
+        public async Task<JSONNode> RequestAsync(
             string url,
             Dictionary<string, object> parameters,
             string method,
@@ -212,36 +212,24 @@ namespace RedCorners.Vimeo
                 }
             }
 
-            return Request(url, method, jsonBody, body);
+            return await RequestAsync(url, method, jsonBody, body);
         }
-
-        public JSONNode Request(
+        
+        public async Task<JSONNode> RequestAsync(
             string url,
             string method,
             bool jsonBody,
             string body)
         {
-            string[] responseHeaders;
-            return Request(url, method, jsonBody, body, out responseHeaders);
-        }
-
-        public JSONNode Request(
-            string url,
-            string method,
-            bool jsonBody,
-            string body,
-            out string[] responseHeaders)
-        {
-            string fetch = RequestRaw(url, method, jsonBody, body, out responseHeaders);
+            string fetch = await RequestRawAsync(url, method, jsonBody, body);
             return JSON.Parse(fetch);
         }
 
-        public string RequestRaw(
+        public async Task<HTTPFetchResponse> RequestRawAsync(
             string url,
             string method,
             bool jsonBody,
-            string body,
-            out string[] responseHeaders)
+            string body)
         {
             string contentType = "application/x-www-form-urlencoded";
             if (jsonBody) contentType = "application/json";
@@ -252,18 +240,17 @@ namespace RedCorners.Vimeo
             method = method.ToUpper();
             url = apiRoot + url;
 
-            var fetch = Core.HTTPFetch(url, method, headers, body, out responseHeaders, contentType);
-            if (VerboseCallback != null) VerboseCallback(fetch);
+            var fetch = await HTTPFetchAsync(url, method, headers, body, contentType);
+            VerboseCallback?.Invoke(fetch);
             return fetch;
         }
 
-        protected static VerifyFeedback Verify(string url)
+        protected static async Task<VerifyFeedback> VerifyAsync(string url)
         {
             WebHeaderCollection headers = new WebHeaderCollection();
             headers.Add("Content-Range: bytes */*");
-
-            string[] responseHeaders;
-            Core.HTTPFetch(url, "PUT", headers, "", out responseHeaders);
+            
+            var responseHeaders = (await HTTPFetchAsync(url, "PUT", headers, "")).Fields;
 
             VerifyFeedback v = new VerifyFeedback();
             foreach (var item in responseHeaders)
@@ -280,7 +267,7 @@ namespace RedCorners.Vimeo
             return v;
         }
 
-        protected static void Upload(
+        protected static async Task UploadAsync(
             string url,
             long contentLength,
             long startByte,
@@ -289,11 +276,9 @@ namespace RedCorners.Vimeo
             WebHeaderCollection headers = new WebHeaderCollection();
             headers.Add(String.Format("Content-Range: bytes {0}-{1}/{2}",
                 startByte, startByte + payload.Length, contentLength));
-
-            string[] responseHeaders;
-            var responseFromServer = Core.HTTPFetch(
-                url, "PUT", headers, payload, payload.Length, out responseHeaders,
-                "video/mp4");
+            
+            var responseFromServer = await HTTPFetchAsync(
+                url, "PUT", headers, payload, payload.Length, "video/mp4");
 
             Debug.WriteLine(String.Format("Response from URL {0}:", url), "Upload");
             Debug.WriteLine(responseFromServer, "Upload");
@@ -301,16 +286,15 @@ namespace RedCorners.Vimeo
 
         }
 
-        protected static string Complete(string url, WebHeaderCollection headers)
+        protected static async Task<string> CompleteAsync(string url, WebHeaderCollection headers)
         {
-            string[] responseHeaders;
-            Core.HTTPFetch(
-                url, "DELETE", headers, "", out responseHeaders,
+            var response = await HTTPFetchAsync(
+                url, "DELETE", headers, "",
                 contentType: "application/x-www-form-urlencoded",
                 requestAccept: "application/vnd.vimeo.*+json; version=3.2");
 
             string result = null;
-            foreach (var item in responseHeaders)
+            foreach (var item in response.Fields)
             {
                 if (item.Contains("Location"))
                 {
@@ -325,7 +309,7 @@ namespace RedCorners.Vimeo
             return result;
         }
 
-        public Ticket GetTicket(string videoid = null, bool? upgrade_to_1080 = null)
+        public async Task<Ticket> GetTicketAsync(string videoid = null, bool? upgrade_to_1080 = null)
         {
             var payload = new Dictionary<string, object>();
             payload["type"] = "streaming";
@@ -333,27 +317,27 @@ namespace RedCorners.Vimeo
             if (!Core.IsNullOrWhiteSpace(videoid))
             {
                 var endpoint = String.Format("/videos/{0}/files", videoid);
-                var response = Request(endpoint,payload,"PUT");
+                var response = await RequestAsync(endpoint,payload,"PUT");
                 return Ticket.FromJson(response);
             }
             else
             {
-                var response = Request("/me/videos",payload,"POST");
+                var response = await RequestAsync("/me/videos",payload,"POST");
                 return Ticket.FromJson(response);
             }
         }
 
-        public string Upload(string path, Ticket ticket = null, 
+        public async Task<string> UploadAsync(string path, Ticket ticket = null, 
             int chunkSize = Core.DEFAULT_CHUNK_SIZE, 
             int maxAttempts = Core.DEFAULT_MAX_ATTEMPTS, 
             long startByte = 0, bool step = false)
         {
             int attempts = 0;
-            if (ticket == null) ticket = GetTicket();
+            if (ticket == null) ticket = await GetTicketAsync();
             long contentLength = new FileInfo(path).Length;
             while (true)
             {
-                var feedback = Verify(ticket.UploadLinkSecure);
+                var feedback = await VerifyAsync(ticket.UploadLinkSecure);
                 startByte = feedback.LastByte;
                 feedback.ContentSize = contentLength;
                 if (VerboseCallback != null) VerboseCallback(String.Format("{0}/{1} Uploaded.", feedback.LastByte, contentLength));
@@ -367,7 +351,7 @@ namespace RedCorners.Vimeo
                 try
                 {
                     var payload = Core.GetPayload(path, startByte, chunkSize);
-                    Upload(ticket.UploadLinkSecure, contentLength, startByte, payload);
+                    await UploadAsync(ticket.UploadLinkSecure, contentLength, startByte, payload);
                 }
                 catch (Exception e)
                 {
@@ -387,7 +371,7 @@ namespace RedCorners.Vimeo
                 if (step) return "";
             }
             
-            var complete = Complete(apiRoot + ticket.CompleteUri,
+            var complete = await CompleteAsync(apiRoot + ticket.CompleteUri,
                 new WebHeaderCollection()
                 {
                     { "Authorization", String.Format("Bearer {0}", AccessToken) }

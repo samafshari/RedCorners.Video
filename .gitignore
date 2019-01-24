@@ -1,3 +1,4 @@
 /.vs/
 bin
 obj
+/RedCorners.WPF/ViewModels/Keys.cs
