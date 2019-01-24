@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using SimpleJSON;
 namespace RedCorners.Vimeo
 {
@@ -8,9 +9,9 @@ namespace RedCorners.Vimeo
         /// Get all valid content ratings
         /// </summary>
         /// <returns></returns>
-        public JSONNode GetContentRatings()
+        public async Task<JSONNode> GetContentRatingsAsync()
         {
-            return Request("/contentratings", null, "GET", true);
+            return await RequestAsync("/contentratings", null, "GET", true);
         }
     }
 }

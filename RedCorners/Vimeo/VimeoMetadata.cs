@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RedCorners.Vimeo
 {
@@ -16,13 +17,12 @@ namespace RedCorners.Vimeo
         public string ReviewLink = "false";
         public string Album = "";
 
-        public void SetMetadata(string videoUri, VimeoHook vc)
+        public async Task SetMetadataAsync(string videoUri, VimeoHook vc)
         {
-            Action<string> SetStatus = (o) =>
+            void SetStatus(string o)
             {
-                if (VimeoHook.VerboseCallback != null)
-                    VimeoHook.VerboseCallback(o);
-            };
+                VimeoHook.VerboseCallback?.Invoke(o);
+            }
             try
             {
                 SetStatus("Applying Metadata for " + Title);
@@ -42,17 +42,17 @@ namespace RedCorners.Vimeo
                 if (PrivacyView == "password")
                     parameters.Add("password", Password);
 
-                vc.Request(videoUri, parameters, "PATCH", false);
+                await vc.RequestAsync(videoUri, parameters, "PATCH", false);
 
                 SetStatus("Adding Tags for " + Title);
                 foreach (string tag in Tags.Split(','))
-                    vc.Request(String.Format("{0}/tags/{1}", videoUri, tag), "PUT", false, "");
+                    await vc.RequestAsync(String.Format("{0}/tags/{1}", videoUri, tag), "PUT", false, "");
 
                 if (!Core.IsNullOrWhiteSpace(Album))
                 {
                     SetStatus("Adding video to album " + Album);
                     string videoRelUri = videoUri.Contains("/video") ? videoUri : "/videos/" + videoUri;
-                    vc.Request(
+                    await vc.RequestAsync(
                         string.Format("/me/albums/{0}{1}", Album, videoRelUri),
                         null, "PUT");
                 }

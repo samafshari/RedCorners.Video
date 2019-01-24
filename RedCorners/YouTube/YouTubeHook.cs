@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using SimpleJSON;
+using System.Threading.Tasks;
 
 //Good tutorials:
 //https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol
@@ -66,7 +67,7 @@ namespace RedCorners.YouTube
             return authUrl;
         }
 
-        static JSONNode GetAccessToken(
+        static async Task<JSONNode> GetAccessTokenAsync(
             string authCode, string clientId, string secret, string redirect)
         {
             var payload = new Dictionary<string, object>
@@ -77,14 +78,14 @@ namespace RedCorners.YouTube
                 {"redirect_uri", redirect },
                 { "grant_type", "authorization_code" }
             };
-            var response = Core.HTTPFetch(
+            var response = await Core.HTTPFetchAsync(
                 "https://www.googleapis.com/oauth2/v3/token",
                 "POST", null, payload);
-            if (VerboseCallback != null) VerboseCallback(response);
+            VerboseCallback?.Invoke(response);
             return JSON.Parse(response);
         }
 
-        static JSONNode RefreshAccessToken(
+        static async Task<JSONNode> RefreshAccessTokenAsync(
             string refreshToken, string clientId, string secret)
         {
             var payload = new Dictionary<string, object>
@@ -94,13 +95,14 @@ namespace RedCorners.YouTube
                 {"refresh_token", refreshToken },
                 {"client_id", clientId }
             };
-            var response = Core.HTTPFetch(
+            var response = await Core.HTTPFetchAsync(
                 "https://www.googleapis.com/oauth2/v3/token",
                 "POST", null, payload);
-            if (VerboseCallback != null) VerboseCallback(response);
+            VerboseCallback?.Invoke(response);
             return JSON.Parse(response);
         }
-        void loadAccessData()
+
+        void LoadAccessData()
         {
 			try
 			{
@@ -113,9 +115,9 @@ namespace RedCorners.YouTube
 			}
         }
 
-        void loadDisplayName()
+        async Task LoadDisplayNameAsync()
         {
-            Me = RequestRaw(
+            Me = await RequestRawAsync(
                 url: "https://www.googleapis.com/plus/v1/people/me",
                 method: "GET",
                 jsonBody: false,
@@ -126,7 +128,7 @@ namespace RedCorners.YouTube
             DisplayName = JSON.Parse(Me)["displayName"].Value;
         }
 
-        public static YouTubeHook Authorize(
+        public static async Task<YouTubeHook> AuthorizeAsync(
             string authCode,
             string clientId,
             string secret,
@@ -137,13 +139,13 @@ namespace RedCorners.YouTube
             yc.secret = secret;
             yc.apiRoot = "https://www.googleapis.com/youtube/v3";
             yc.redirect = redirect;
-            yc.AccessJson = GetAccessToken(authCode, yc.clientId, yc.secret, yc.redirect);
-            yc.loadAccessData();
-            yc.loadDisplayName();
+            yc.AccessJson = await GetAccessTokenAsync(authCode, yc.clientId, yc.secret, yc.redirect);
+            yc.LoadAccessData();
+            await yc.LoadDisplayNameAsync();
             return yc;
         }
 
-        public static YouTubeHook ReAuthorize(
+        public static async Task<YouTubeHook> ReAuthorizeAsync(
             string refreshToken,
             string clientId,
             string secret,
@@ -156,19 +158,19 @@ namespace RedCorners.YouTube
             yc.secret = secret;
             yc.RefreshToken = refreshToken;
             yc.apiRoot = "https://www.googleapis.com/youtube/v3";
-            yc.RefreshAuthorization();
-            yc.loadDisplayName();
+            await yc.RefreshAuthorizationAsync();
+            await yc.LoadDisplayNameAsync();
             return yc;
         }
 
-        public void RefreshAuthorization()
+        public async Task RefreshAuthorizationAsync()
         {
-            AccessJson = RefreshAccessToken(RefreshToken, clientId, secret);
+            AccessJson = await RefreshAccessTokenAsync(RefreshToken, clientId, secret);
             if (AccessJson.Count < 4) throw new Exception(AccessJson["error"]);
-            loadAccessData();
+            LoadAccessData();
         }
 
-        public JSONNode Request(
+        public async Task<JSONNode> RequestAsync(
             string url,
             Dictionary<string, object> parameters,
             string method,
@@ -197,10 +199,10 @@ namespace RedCorners.YouTube
                 }
             }
 
-            return Request(url, method, jsonBody, body, overrideApiRoot, host: host);
+            return await RequestAsync(url, method, jsonBody, body, overrideApiRoot, host: host);
         }
 
-        public JSONNode Request(
+        public async Task<JSONNode> RequestAsync(
             string url,
             string method,
             bool jsonBody,
@@ -208,7 +210,7 @@ namespace RedCorners.YouTube
             string overrideApiRoot = "",
             string host = null)
         {
-            var fetch = RequestRaw(url, method, jsonBody, body, overrideApiRoot, host);
+            var fetch = await RequestRawAsync(url, method, jsonBody, body, overrideApiRoot, host);
 
             try
             {
@@ -220,7 +222,7 @@ namespace RedCorners.YouTube
             }
         }
 
-        public string RequestRaw(
+        public async Task<string> RequestRawAsync(
             string url,
             string method,
             bool jsonBody,
@@ -238,20 +240,18 @@ namespace RedCorners.YouTube
             method = method.ToUpper();
             if (overrideApiRoot == null) overrideApiRoot = apiRoot;
             url = overrideApiRoot + url;
-            string[] responseHeaders;
-            string fetch = Core.HTTPFetch(url, method, headers, body, out responseHeaders, contentType,
+            var fetch = await Core.HTTPFetchAsync(url, method, headers, body, contentType,
                 requestAccept: null, host: host);
-            if (VerboseCallback != null) VerboseCallback(fetch);
+            VerboseCallback?.Invoke(fetch);
 
-            if (responseHeaders.Length == 0 || responseHeaders[0].Contains(" 40"))
+            if (fetch.Fields.Length == 0 || fetch.Fields[0].Contains(" 40"))
             {
                 if (unauthorizedAttempts == 0)
                 {
                     unauthorizedAttempts++;
-                    RefreshAuthorization();
-                    fetch = Core.HTTPFetch(url, method, headers, body, contentType,
-                    requestAccept: null, host: host);
-                    if (VerboseCallback != null) VerboseCallback(fetch);
+                    await RefreshAuthorizationAsync();
+                    fetch = await Core.HTTPFetchAsync(url, method, headers, body, contentType, requestAccept: null, host: host);
+                    VerboseCallback?.Invoke(fetch);
                     unauthorizedAttempts = 0;
                 }
                 else throw new Exception("Got 40x multiple times.");
@@ -260,9 +260,9 @@ namespace RedCorners.YouTube
             return fetch;
         }
 
-        public void ApplyVideoMetadata(string id, YouTubeMetadata meta)
+        public async Task ApplyVideoMetadataAsync(string id, YouTubeMetadata meta)
         {
-            Request(
+            await RequestAsync(
                 "https://www.googleapis.com/youtube/v3/videos?part=snippet%2Cstatus&fields=id%2Csnippet%2Cstatus&key=" + clientId,
                 "PUT",
                 true,
@@ -271,9 +271,9 @@ namespace RedCorners.YouTube
                 null);
         }
 
-        public void FillCategories(string regionCode = "us")
+        public async Task FillCategoriesAsync(string regionCode = "us")
         {
-            JSONNode response = Request(
+            JSONNode response = await RequestAsync(
                 "https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=" + regionCode + "&key=" + clientId, 
                 "GET", 
                 false, 
@@ -290,7 +290,7 @@ namespace RedCorners.YouTube
             }
         }
 
-        public string GetUploadSessionUrl(string filepath)
+        public async Task<string> GetUploadSessionUrlAsync(string filepath)
         {
             if (!File.Exists(filepath))
             {
@@ -298,10 +298,10 @@ namespace RedCorners.YouTube
                 return null;
             }
             FileInfo info = new FileInfo(filepath);
-            return GetUploadSessionUrl(info);
+            return await GetUploadSessionUrlAsync(info);
         }
 
-        public string GetUploadSessionUrl(FileInfo file)
+        public async Task<string> GetUploadSessionUrlAsync(FileInfo file)
         {
             var url = "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=id&key=" + clientId;
             var headers = new WebHeaderCollection()
@@ -311,30 +311,29 @@ namespace RedCorners.YouTube
                 { "X-Upload-Content-Type", "video/*"}
             };
 
-            string[] responseHeaders = null;
-            Core.HTTPFetch(url, "POST", headers, "", out responseHeaders, "application/json; charset=utf-8");
+            var response = await Core.HTTPFetchAsync(url, "POST", headers, "", "application/json; charset=utf-8");
 
-            if (responseHeaders.Length == 0 || responseHeaders[0].Contains(" 40"))
+            if (response.Fields.Length == 0 || response.Fields[0].Contains(" 40"))
             {
                 if (unauthorizedAttempts == 0)
                 {
                     unauthorizedAttempts++;
-                    RefreshAuthorization();
-                    var r = GetUploadSessionUrl(file);
+                    await RefreshAuthorizationAsync();
+                    var r = await GetUploadSessionUrlAsync(file);
                     unauthorizedAttempts = 0;
                     return r;
                 }
                 else throw new Exception("Error getting the upload session.");
             }
 
-            string resumeUrl = Core.GetHeaderValue(responseHeaders, "Location");
+            string resumeUrl = Core.GetHeaderValue(response.Fields, "Location");
 
             Debug.WriteLine(String.Format("Response from URL {0}:", url), "StartResumableSession");
             Debug.WriteLine(resumeUrl, "StartResumableSession");
             return resumeUrl;
         }
 
-        public string Upload(
+        public async Task<string> UploadAsync(
             string url,
             long totalLength,
             long startByte,
@@ -347,30 +346,28 @@ namespace RedCorners.YouTube
                 startByte, startByte + payload.Length - 1, totalLength) }
             };
 
-            if (VerboseCallback != null) VerboseCallback("SENDING PAYLOAD TO SERVER");
-            string[] responseHeaders = null;
-            var responseFromServer = Core.HTTPFetch(url, "PUT", headers, payload, payload.Length, out responseHeaders, "video/*");
-            if (VerboseCallback != null) VerboseCallback("FINISHED SENDING PAYLOAD TO SERVER");
+            VerboseCallback?.Invoke("SENDING PAYLOAD TO SERVER");
+            var responseFromServer = await Core.HTTPFetchAsync(url, "PUT", headers, payload, payload.Length, "video/*");
+            VerboseCallback?.Invoke("FINISHED SENDING PAYLOAD TO SERVER");
 
             Debug.WriteLine(String.Format("Response from URL {0}:", url), "Upload");
             return responseFromServer;
         }
 
-        public VerifyFeedback Verify(string url, FileInfo info)
+        public async Task<VerifyFeedback> VerifyAsync(string url, FileInfo info)
         {
-            if (VerboseCallback != null) VerboseCallback("VERIFYING...");
+            VerboseCallback?.Invoke("VERIFYING...");
             var headers = new WebHeaderCollection()
             {
                 { "Authorization", String.Format("Bearer {0}", AccessToken) },
                 { "Content-Range", String.Format("bytes */{0}",info.Length.ToString()) }
             };
 
-            string[] responseHeaders = null;
-            Core.HTTPFetch(url, "PUT", headers, "", out responseHeaders, contentType: null);
-            bool responseOK = responseHeaders.Length > 0 && responseHeaders[0].Contains(" 20");
+            var response = await Core.HTTPFetchAsync(url, "PUT", headers, "", contentType: null);
+            bool responseOK = response.Fields.Length > 0 && response.Fields[0].Contains(" 20");
 
             VerifyFeedback v = new VerifyFeedback();
-            if (VerboseCallback != null) VerboseCallback("VERIFY FEEDBACK: " + responseOK);
+            VerboseCallback?.Invoke("VERIFY FEEDBACK: " + responseOK);
             if (responseOK)
             {
                 v.LastByte = v.ContentSize; //Meaning upload is successful
@@ -380,7 +377,7 @@ namespace RedCorners.YouTube
                 try
                 {
                     //Range: bytes=0-999999
-                    foreach (var item in responseHeaders)
+                    foreach (var item in response.Fields)
                     {
                         if (item.StartsWith("Range:"))
                         {
@@ -399,14 +396,14 @@ namespace RedCorners.YouTube
                 }
             }
             
-            foreach (string item in responseHeaders)
+            foreach (string item in response.Fields)
                 Debug.WriteLine(item);
 
             return v;
         }
 
         public Action<VerifyFeedback> UploadCallback = null;
-        public string Upload(string path, string url = null,
+        public async Task<string> UploadAsync(string path, string url = null,
             int chunkSize = Core.DEFAULT_CHUNK_SIZE,
             int maxAttempts = Core.DEFAULT_MAX_ATTEMPTS,
             long startByte = 0,
@@ -419,16 +416,16 @@ namespace RedCorners.YouTube
             if (url == null)
             {
                 Debug.WriteLine("No upload URL specified. Making a new one...");
-                url = GetUploadSessionUrl(info);
+                url = await GetUploadSessionUrlAsync(info);
             }
             long contentLength = info.Length;
             string result = null;
             while (true)
             {
-                if (VerboseCallback != null) VerboseCallback("Begin Upload Loop");
+                VerboseCallback?.Invoke("Begin Upload Loop");
                 try
                 {
-                    var feedback = Verify(url, info);
+                    var feedback = await VerifyAsync(url, info);
                     if (startByte + 1024 < feedback.LastByte) attempts = 0;
                     startByte = feedback.LastByte;
                     feedback.ContentSize = contentLength;
@@ -441,10 +438,10 @@ namespace RedCorners.YouTube
                     }
 
                     var payload = Core.GetPayload(path, startByte, chunkSize);
-                    result = Upload(url, contentLength, startByte, payload);
+                    result = await UploadAsync(url, contentLength, startByte, payload);
                     if (result != null)
                     {
-                        if (VerboseCallback != null) VerboseCallback(result);
+                        VerboseCallback?.Invoke(result);
                         if (!Core.IsNullOrWhiteSpace(result))
                         {
                             var d = JSON.Parse(result);
@@ -457,8 +454,8 @@ namespace RedCorners.YouTube
                 catch (Exception e)
                 {
                     Debug.WriteLine(string.Format("Error in Upload (Attempts {0})", attempts), "Upload");
-                    if (VerboseCallback != null) VerboseCallback(string.Format("Error in Upload (Attempts {0})", attempts));
-                    if (VerboseCallback != null) VerboseCallback(e.Message);
+                    VerboseCallback?.Invoke(string.Format("Error in Upload (Attempts {0})", attempts));
+                    VerboseCallback?.Invoke(e.Message);
                     attempts++;
                     if (attempts > maxAttempts)
                     {
@@ -467,7 +464,7 @@ namespace RedCorners.YouTube
                     }
                     throw e;
                 }
-                if (VerboseCallback != null) VerboseCallback("End Upload Loop");
+                VerboseCallback?.Invoke("End Upload Loop");
                 if (step) return "";
             }
 

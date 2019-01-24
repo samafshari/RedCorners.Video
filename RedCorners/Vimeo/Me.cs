@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using SimpleJSON;
 namespace RedCorners.Vimeo
 {
@@ -8,9 +9,9 @@ namespace RedCorners.Vimeo
         /// Get a user
         /// </summary>
         /// <returns></returns>
-        public JSONNode GetMe()
+        public async Task<JSONNode> GetMeAsync()
         {
-            return Request("/me", null, "GET", true);
+            return await RequestAsync("/me", null, "GET", true);
         }
 
         /// <summary>
@@ -37,7 +38,7 @@ namespace RedCorners.Vimeo
         /// <param name="location">The user's location</param>
         /// <param name="bio">The user's bio</param>
         /// <returns></returns>
-        public JSONNode EditMe(
+        public async Task<JSONNode> EditMeAsync(
             string videos_privacy_download = null,
             string videos_privacy_add = null,
             string videos_privacy_comments = null,
@@ -57,7 +58,7 @@ namespace RedCorners.Vimeo
             if (name != null) payload["name"] = name;
             if (location != null) payload["location"] = location;
             if (bio != null) payload["bio"] = bio;
-            return Request("/me", payload, "PATCH", true);
+            return await RequestAsync("/me", payload, "PATCH", true);
         }
 
         /// <summary>
@@ -75,7 +76,7 @@ namespace RedCorners.Vimeo
         /// asc
         /// desc</param>
         /// <returns></returns>
-        public JSONNode GetMyAlbums(int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetMyAlbumsAsync(int? page = null, int? per_page = null,
             string query = null, string sort = null, string direction = null)
         {
             var payload = new Dictionary<string, object>();
@@ -84,7 +85,7 @@ namespace RedCorners.Vimeo
             if (query != null) payload["query"] = query;
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request("/me/albums", payload, "GET", true);
+            return await RequestAsync("/me/albums", payload, "GET", true);
         }
 
         /// <summary>
@@ -107,7 +108,7 @@ namespace RedCorners.Vimeo
         /// added_last
         /// alphabetical</param>
         /// <returns></returns>
-        public JSONNode CreateAlbum(
+        public async Task<JSONNode> CreateAlbumAsync(
             string name, string description,
             string privacy = null, string password = null, string sort = null)
         {
@@ -117,7 +118,7 @@ namespace RedCorners.Vimeo
             if (privacy != null) payload["privacy"] = privacy;
             if (password != null) payload["password"] = password;
             if (sort != null) payload["sort"] = sort;
-            return Request("/me/albums", payload, "POST", true);
+            return await RequestAsync("/me/albums", payload, "POST", true);
         }
 
         /// <summary>
@@ -125,9 +126,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="albumId"></param>
         /// <returns></returns>
-        public JSONNode GetAlbum(string albumId)
+        public async Task<JSONNode> GetAlbumAsync(string albumId)
         {
-            return Request(string.Format("/me/albums/{0}", albumId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/albums/{0}", albumId), null, "GET", true);
         }
 
         /// <summary>
@@ -139,7 +140,7 @@ namespace RedCorners.Vimeo
         /// <param name="privacy">The Album's new privacy level</param>
         /// <param name="sort">The new default sort for the Album</param>
         /// <returns></returns>
-        public JSONNode EditAlbum(string albumId, string name = null,
+        public async Task<JSONNode> EditAlbumAsync(string albumId, string name = null,
             string description = null, string privacy = null, string sort = null)
         {
             var payload = new Dictionary<string, object>();
@@ -147,7 +148,7 @@ namespace RedCorners.Vimeo
             if (description != null) payload["description"] = description;
             if (privacy != null) payload["privacy"] = privacy;
             if (sort != null) payload["sort"] = sort;
-            return Request(string.Format("/me/albums/{0}", albumId), null, "PATCH", true);
+            return await RequestAsync(string.Format("/me/albums/{0}", albumId), null, "PATCH", true);
         }
 
         /// <summary>
@@ -155,9 +156,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="albumId"></param>
         /// <returns></returns>
-        public JSONNode DeleteAlbum(string albumId)
+        public async Task<JSONNode> DeleteAlbumAsync(string albumId)
         {
-            return Request(string.Format("/me/albums/{0}", albumId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/me/albums/{0}", albumId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -172,7 +173,7 @@ namespace RedCorners.Vimeo
         /// <param name="sort">Technique used to sort the results.</param>
         /// <param name="direction">The direction that the results are sorted.</param>
         /// <returns></returns>
-        public JSONNode GetAlbumVideos(string albumId,
+        public async Task<JSONNode> GetAlbumVideosAsync(string albumId,
             int? page = null, int? per_page = null,
             string query = null, string filter = null,
             bool? filter_embeddable = null, string sort = null, string direction = null)
@@ -185,7 +186,7 @@ namespace RedCorners.Vimeo
             if (filter_embeddable != null) payload["filter_embeddable"] = filter_embeddable.Value.ToString().ToLower();
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request(string.Format("/me/albums/{0}/videos", albumId), payload, "GET", true);
+            return await RequestAsync(string.Format("/me/albums/{0}/videos", albumId), payload, "GET", true);
         }
 
         /// <summary>
@@ -194,9 +195,9 @@ namespace RedCorners.Vimeo
         /// <param name="albumId"></param>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode GetAlbumHasVideo(string albumId, string videoId)
+        public async Task<JSONNode> GetAlbumHasVideoAsync(string albumId, string videoId)
         {
-            return Request(string.Format("/me/albums/{0}/videos/{1}", albumId, videoId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/albums/{0}/videos/{1}", albumId, videoId), null, "GET", true);
         }
 
         /// <summary>
@@ -205,9 +206,9 @@ namespace RedCorners.Vimeo
         /// <param name="albumId"></param>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode AddVideoToAlbum(string albumId, string videoId)
+        public async Task<JSONNode> AddVideoToAlbumAsync(string albumId, string videoId)
         {
-            return Request(string.Format("/me/albums/{0}/videos/{1}", albumId, videoId), null, "PUT", true);
+            return await RequestAsync(string.Format("/me/albums/{0}/videos/{1}", albumId, videoId), null, "PUT", true);
         }
 
         /// <summary>
@@ -216,9 +217,9 @@ namespace RedCorners.Vimeo
         /// <param name="albumId"></param>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode DeleteVideoFromAlbum(string albumId, string videoId)
+        public async Task<JSONNode> DeleteVideoFromAlbumAsync(string albumId, string videoId)
         {
-            return Request(string.Format("/me/albums/{0}/videos/{1}", albumId, videoId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/me/albums/{0}/videos/{1}", albumId, videoId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -241,7 +242,7 @@ namespace RedCorners.Vimeo
         /// asc
         /// desc</param>
         /// <returns></returns>
-        public JSONNode GetMyAppearances(int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetMyAppearancesAsync(int? page = null, int? per_page = null,
             string query = null, string filter = null,
             bool? filter_embeddable = null, string sort = null, string direction = null)
         {
@@ -253,7 +254,7 @@ namespace RedCorners.Vimeo
             if (filter_embeddable != null) payload["filter_embeddable"] = filter_embeddable.Value.ToString().ToLower();
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request("/me/appearances", payload, "GET", true);
+            return await RequestAsync("/me/appearances", payload, "GET", true);
         }
 
         /// <summary>
@@ -273,7 +274,7 @@ namespace RedCorners.Vimeo
         /// <param name="filter">Filter to apply to the results.
         /// moderated</param>
         /// <returns></returns>
-        public JSONNode GetMyChannels(int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetMyChannelsAsync(int? page = null, int? per_page = null,
             string query = null, string sort = null,
             string direction = null, string filter = null)
         {
@@ -284,7 +285,7 @@ namespace RedCorners.Vimeo
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
             if (filter != null) payload["filter"] = filter;
-            return Request("/me/channels", payload, "GET", true);
+            return await RequestAsync("/me/channels", payload, "GET", true);
         }
 
         /// <summary>
@@ -292,9 +293,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="channelId"></param>
         /// <returns></returns>
-        public JSONNode AmIFollowingChannel(string channelId)
+        public async Task<JSONNode> AmIFollowingChannelAsync(string channelId)
         {
-            return Request(string.Format("/me/channels/{0}", channelId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/channels/{0}", channelId), null, "GET", true);
         }
 
         /// <summary>
@@ -302,9 +303,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="channelId"></param>
         /// <returns></returns>
-        public JSONNode SubscribeChannel(string channelId)
+        public async Task<JSONNode> SubscribeChannelAsync(string channelId)
         {
-            return Request(string.Format("/me/channels/{0}", channelId), null, "PUT", true);
+            return await RequestAsync(string.Format("/me/channels/{0}", channelId), null, "PUT", true);
         }
 
         /// <summary>
@@ -312,9 +313,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="channelId"></param>
         /// <returns></returns>
-        public JSONNode UnsubscribeChannel(string channelId)
+        public async Task<JSONNode> UnsubscribeChannelAsync(string channelId)
         {
-            return Request(string.Format("/me/channels/{0}", channelId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/me/channels/{0}", channelId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -334,7 +335,7 @@ namespace RedCorners.Vimeo
         /// <param name="filter">Filter to apply to the results.
         /// moderated</param>
         /// <returns></returns>
-        public JSONNode GetMyGroups(int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetMyGroupsAsync(int? page = null, int? per_page = null,
             string query = null, string sort = null,
             string direction = null, string filter = null)
         {
@@ -345,7 +346,7 @@ namespace RedCorners.Vimeo
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
             if (filter != null) payload["filter"] = filter;
-            return Request("/me/groups", payload, "GET", true);
+            return await RequestAsync("/me/groups", payload, "GET", true);
         }
 
         /// <summary>
@@ -353,9 +354,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="groupId"></param>
         /// <returns></returns>
-        public JSONNode AmIMemberOfGroup(string groupId)
+        public async Task<JSONNode> AmIMemberOfGroupAsync(string groupId)
         {
-            return Request(string.Format("/me/groups/{0}", groupId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/groups/{0}", groupId), null, "GET", true);
         }
 
         /// <summary>
@@ -363,9 +364,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="groupId"></param>
         /// <returns></returns>
-        public JSONNode JoinGroup(string groupId)
+        public async Task<JSONNode> JoinGroupAsync(string groupId)
         {
-            return Request(string.Format("/me/groups/{0}", groupId), null, "PUT", true);
+            return await RequestAsync(string.Format("/me/groups/{0}", groupId), null, "PUT", true);
         }
 
         /// <summary>
@@ -373,9 +374,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="groupId"></param>
         /// <returns></returns>
-        public JSONNode LeaveGroup(string groupId)
+        public async Task<JSONNode> LeaveGroupAsync(string groupId)
         {
-            return Request(string.Format("/me/groups/{0}", groupId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/me/groups/{0}", groupId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -385,13 +386,13 @@ namespace RedCorners.Vimeo
         /// <param name="page">The page number to show.</param>
         /// <param name="per_page">Number of items to show on each page. Max 50.</param>
         /// <returns></returns>
-        public JSONNode GetMyFeeds(string offset, int? page = null, int? per_page = null)
+        public async Task<JSONNode> GetMyFeedsAsync(string offset, int? page = null, int? per_page = null)
         {
             var payload = new Dictionary<string, object>();
             payload["offset"] = offset;
             if (page != null) payload["page"] = page.Value.ToString();
             if (per_page != null) payload["per_page"] = per_page.Value.ToString();
-            return Request("/me/feed", payload, "GET", true);
+            return await RequestAsync("/me/feed", payload, "GET", true);
         }
 
         /// <summary>
@@ -407,7 +408,7 @@ namespace RedCorners.Vimeo
         /// asc
         /// desc</param>
         /// <returns></returns>
-        public JSONNode GetMyFollowers(int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetMyFollowersAsync(int? page = null, int? per_page = null,
             string query = null, string sort = null,
             string direction = null)
         {
@@ -417,7 +418,7 @@ namespace RedCorners.Vimeo
             if (query != null) payload["query"] = query;
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request("/me/followers", payload, "GET", true);
+            return await RequestAsync("/me/followers", payload, "GET", true);
         }
 
         /// <summary>
@@ -435,7 +436,7 @@ namespace RedCorners.Vimeo
         /// <param name="filter">Filter to apply to the results.
         /// online</param>
         /// <returns></returns>
-        public JSONNode GetMyFollowing(int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetMyFollowingAsync(int? page = null, int? per_page = null,
             string query = null, string sort = null,
             string direction = null, string filter = null)
         {
@@ -446,7 +447,7 @@ namespace RedCorners.Vimeo
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
             if (filter != null) payload["filter"] = filter;
-            return Request("/me/following", payload, "GET", true);
+            return await RequestAsync("/me/following", payload, "GET", true);
         }
 
         /// <summary>
@@ -454,9 +455,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="followUserId"></param>
         /// <returns></returns>
-        public JSONNode CheckFollow(string followUserId)
+        public async Task<JSONNode> CheckFollowAsync(string followUserId)
         {
-            return Request(string.Format("/me/following/{0}", followUserId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/following/{0}", followUserId), null, "GET", true);
         }
 
         /// <summary>
@@ -464,9 +465,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="followUserId"></param>
         /// <returns></returns>
-        public JSONNode Follow(string followUserId)
+        public async Task<JSONNode> FollowAsync(string followUserId)
         {
-            return Request(string.Format("/me/following/{0}", followUserId), null, "PUT", true);
+            return await RequestAsync(string.Format("/me/following/{0}", followUserId), null, "PUT", true);
         }
 
         /// <summary>
@@ -474,9 +475,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="followUserId"></param>
         /// <returns></returns>
-        public JSONNode Unfollow(string followUserId)
+        public async Task<JSONNode> UnfollowAsync(string followUserId)
         {
-            return Request(string.Format("/me/following/{0}", followUserId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/me/following/{0}", followUserId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -497,7 +498,7 @@ namespace RedCorners.Vimeo
         /// <param name="filter_embeddable">Required if filter=embeddable. Choose between only videos that are embeddable, and only videos that are not embeddable.</param>
         /// <param name="direction">The direction that the results are sorted.</param>
         /// <returns></returns>
-        public JSONNode GetMyLikes(int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetMyLikesAsync(int? page = null, int? per_page = null,
             string query = null, string sort = null,
             string filter = null, bool? filter_embeddable = null, string direction = null)
         {
@@ -509,7 +510,7 @@ namespace RedCorners.Vimeo
             if (filter_embeddable != null) payload["filter_embeddable"] = filter_embeddable.Value.ToString().ToLower();
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request("/me/likes", payload, "GET", true);
+            return await RequestAsync("/me/likes", payload, "GET", true);
         }
 
         /// <summary>
@@ -517,9 +518,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode DoILike(string videoId)
+        public async Task<JSONNode> DoILikeAsync(string videoId)
         {
-            return Request(string.Format("/me/likes/{0}", videoId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/likes/{0}", videoId), null, "GET", true);
         }
 
         /// <summary>
@@ -527,9 +528,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode Like(string videoId)
+        public async Task<JSONNode> LikeAsync(string videoId)
         {
-            return Request(string.Format("/me/likes/{0}", videoId), null, "PUT", true);
+            return await RequestAsync(string.Format("/me/likes/{0}", videoId), null, "PUT", true);
         }
 
         /// <summary>
@@ -537,27 +538,27 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode Unlike(string videoId)
+        public async Task<JSONNode> UnlikeAsync(string videoId)
         {
-            return Request(string.Format("/me/likes/{0}", videoId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/me/likes/{0}", videoId), null, "DELETE", true);
         }
 
         /// <summary>
         /// Get a list of this user's portrait images.
         /// </summary>
         /// <returns></returns>
-        public JSONNode GetMyPictures()
+        public async Task<JSONNode> GetMyPicturesAsync()
         {
-            return Request("/me/pictures", null, "GET", true);
+            return await RequestAsync("/me/pictures", null, "GET", true);
         }
 
         /// <summary>
         /// Create a new picture resource.
         /// </summary>
         /// <returns></returns>
-        public JSONNode CreatePicture()
+        public async Task<JSONNode> CreatePictureAsync()
         {
-            return Request("/me/pictures", null, "POST", true);
+            return await RequestAsync("/me/pictures", null, "POST", true);
         }
 
         /// <summary>
@@ -565,9 +566,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="portraitsetId"></param>
         /// <returns></returns>
-        public JSONNode GetMyPictureExists(string portraitsetId)
+        public async Task<JSONNode> GetMyPictureExistsAsync(string portraitsetId)
         {
-            return Request(string.Format("/me/pictures/{0}", portraitsetId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/pictures/{0}", portraitsetId), null, "GET", true);
         }
 
         /// <summary>
@@ -576,11 +577,11 @@ namespace RedCorners.Vimeo
         /// <param name="portraitsetId"></param>
         /// <param name="active">Set a picture as your active portrait</param>
         /// <returns></returns>
-        public JSONNode EditPicture(string portraitsetId, bool? active = null)
+        public async Task<JSONNode> EditPictureAsync(string portraitsetId, bool? active = null)
         {
             var payload = new Dictionary<string, object>();
             if (active.HasValue) payload["active"] = active.Value.ToString().ToLower();
-            return Request(string.Format("/me/pictures/{0}", portraitsetId), payload, "PATCH", true);
+            return await RequestAsync(string.Format("/me/pictures/{0}", portraitsetId), payload, "PATCH", true);
         }
 
         /// <summary>
@@ -596,7 +597,7 @@ namespace RedCorners.Vimeo
         /// asc
         /// desc</param>
         /// <returns></returns>
-        public JSONNode GetMyPortfolios(int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetMyPortfoliosAsync(int? page = null, int? per_page = null,
             string query = null, string sort = null, string direction = null)
         {
             var payload = new Dictionary<string, object>();
@@ -605,7 +606,7 @@ namespace RedCorners.Vimeo
             if (query != null) payload["query"] = query;
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request("/me/portfolios", payload, "GET", true);
+            return await RequestAsync("/me/portfolios", payload, "GET", true);
         }
 
         /// <summary>
@@ -613,9 +614,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="portfolioId"></param>
         /// <returns></returns>
-        public JSONNode GetPortfolio(string portfolioId)
+        public async Task<JSONNode> GetPortfolioAsync(string portfolioId)
         {
-            return Request(string.Format("/me/portfolios/{0}", portfolioId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/portfolios/{0}", portfolioId), null, "GET", true);
         }
 
         /// <summary>
@@ -636,7 +637,7 @@ namespace RedCorners.Vimeo
         /// asc
         /// desc</param>
         /// <returns></returns>
-        public JSONNode GetPortfolioVideos(string portfolioId,
+        public async Task<JSONNode> GetPortfolioVideosAsync(string portfolioId,
             int? page = null, int? per_page = null, string sort = null, string direction = null)
         {
             var payload = new Dictionary<string, object>();
@@ -644,7 +645,7 @@ namespace RedCorners.Vimeo
             if (per_page != null) payload["per_page"] = per_page.Value.ToString();
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request(string.Format("/me/portfolios/{0}", portfolioId), payload, "GET", true);
+            return await RequestAsync(string.Format("/me/portfolios/{0}", portfolioId), payload, "GET", true);
         }
 
         /// <summary>
@@ -653,9 +654,9 @@ namespace RedCorners.Vimeo
         /// <param name="portfolioId"></param>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode GetPortfolioHasVideo(string portfolioId, string videoId)
+        public async Task<JSONNode> GetPortfolioHasVideoAsync(string portfolioId, string videoId)
         {
-            return Request(string.Format("/me/portfolios/{0}/videos/{1}", portfolioId, videoId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/portfolios/{0}/videos/{1}", portfolioId, videoId), null, "GET", true);
         }
 
         /// <summary>
@@ -664,9 +665,9 @@ namespace RedCorners.Vimeo
         /// <param name="portfolioId"></param>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode AddVideoToPortfolio(string portfolioId, string videoId)
+        public async Task<JSONNode> AddVideoToPortfolioAsync(string portfolioId, string videoId)
         {
-            return Request(string.Format("/me/portfolios/{0}/videos/{1}", portfolioId, videoId), null, "PUT", true);
+            return await RequestAsync(string.Format("/me/portfolios/{0}/videos/{1}", portfolioId, videoId), null, "PUT", true);
         }
 
         /// <summary>
@@ -675,9 +676,9 @@ namespace RedCorners.Vimeo
         /// <param name="portfolioId"></param>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode DeleteVideoFromPortfolio(string portfolioId, string videoId)
+        public async Task<JSONNode> DeleteVideoFromPortfolioAsync(string portfolioId, string videoId)
         {
-            return Request(string.Format("/me/portfolios/{0}/videos/{1}", portfolioId, videoId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/me/portfolios/{0}/videos/{1}", portfolioId, videoId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -687,13 +688,13 @@ namespace RedCorners.Vimeo
         /// <param name="per_page">Number of items to show on each page. Max 50.</param>
         /// <param name="query">Search query.</param>
         /// <returns></returns>
-        public JSONNode GetMyPresets(int? page = null, int? per_page = null, string query = null)
+        public async Task<JSONNode> GetMyPresetsAsync(int? page = null, int? per_page = null, string query = null)
         {
             var payload = new Dictionary<string, object>();
             if (page != null) payload["page"] = page.Value.ToString();
             if (per_page != null) payload["per_page"] = per_page.Value.ToString();
             if (query != null) payload["query"] = query;
-            return Request("/me/presets", payload, "GET", true);
+            return await RequestAsync("/me/presets", payload, "GET", true);
         }
 
         /// <summary>
@@ -701,9 +702,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="presetId"></param>
         /// <returns></returns>
-        public JSONNode GetPreset(string presetId)
+        public async Task<JSONNode> GetPresetAsync(string presetId)
         {
-            return Request(string.Format("/me/presets/{0}", presetId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/presets/{0}", presetId), null, "GET", true);
         }
 
         /// <summary>
@@ -713,11 +714,11 @@ namespace RedCorners.Vimeo
         /// <param name="outro">Disable the outro.
         /// nothing</param>
         /// <returns></returns>
-        public JSONNode EditPreset(string presetId, string outro = null)
+        public async Task<JSONNode> EditPresetAsync(string presetId, string outro = null)
         {
             var payload = new Dictionary<string, object>();
             if (outro != null) payload["outro"] = outro;
-            return Request(string.Format("/me/presets/{0}", presetId), payload, "PATCH", true);
+            return await RequestAsync(string.Format("/me/presets/{0}", presetId), payload, "PATCH", true);
         }
 
         /// <summary>
@@ -725,9 +726,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="presetId"></param>
         /// <returns></returns>
-        public JSONNode GetPresetVideos(string presetId)
+        public async Task<JSONNode> GetPresetVideosAsync(string presetId)
         {
-            return Request(string.Format("/me/presets/{0}/videos", presetId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/presets/{0}/videos", presetId), null, "GET", true);
         }
 
         /// <summary>
@@ -754,7 +755,7 @@ namespace RedCorners.Vimeo
         /// asc
         /// desc</param>
         /// <returns></returns>
-        public JSONNode GetMyVideos(int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetMyVideosAsync(int? page = null, int? per_page = null,
             string query = null, string filter = null,
             bool? filter_embeddable = null, bool? filter_playable = null, string sort = null, string direction = null)
         {
@@ -767,7 +768,7 @@ namespace RedCorners.Vimeo
             if (filter_playable != null) payload["filter_playable"] = filter_playable.Value.ToString().ToLower();
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request("/me/videos", payload, "GET", true);
+            return await RequestAsync("/me/videos", payload, "GET", true);
         }
 
         /// <summary>
@@ -775,9 +776,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode DoIHaveVideo(string videoId)
+        public async Task<JSONNode> DoIHaveVideoAsync(string videoId)
         {
-            return Request(string.Format("/me/videos/{0}", videoId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/videos/{0}", videoId), null, "GET", true);
         }
 
         /// <summary>
@@ -799,7 +800,7 @@ namespace RedCorners.Vimeo
         /// asc
         /// desc</param>
         /// <returns></returns>
-        public JSONNode GetMyWatchLater(int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetMyWatchLaterAsync(int? page = null, int? per_page = null,
             string query = null, string filter = null,
             bool? filter_embeddable = null, string sort = null, string direction = null)
         {
@@ -811,7 +812,7 @@ namespace RedCorners.Vimeo
             if (filter_embeddable != null) payload["filter_embeddable"] = filter_embeddable.Value.ToString().ToLower();
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request("/me/watchlater", payload, "GET", true);
+            return await RequestAsync("/me/watchlater", payload, "GET", true);
         }
 
         /// <summary>
@@ -819,9 +820,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode WatchLaterHasVideo(string videoId)
+        public async Task<JSONNode> WatchLaterHasVideoAsync(string videoId)
         {
-            return Request(string.Format("/me/watchlater/{0}", videoId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/watchlater/{0}", videoId), null, "GET", true);
         }
 
         /// <summary>
@@ -829,9 +830,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode AddVideoToWatchLater(string videoId)
+        public async Task<JSONNode> AddVideoToWatchLaterAsync(string videoId)
         {
-            return Request(string.Format("/me/watchlater/{0}", videoId), null, "PUT", true);
+            return await RequestAsync(string.Format("/me/watchlater/{0}", videoId), null, "PUT", true);
         }
 
         /// <summary>
@@ -839,9 +840,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode DeleteVideoFromWatchLater(string videoId)
+        public async Task<JSONNode> DeleteVideoFromWatchLaterAsync(string videoId)
         {
-            return Request(string.Format("/me/watchlater/{0}", videoId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/me/watchlater/{0}", videoId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -859,7 +860,7 @@ namespace RedCorners.Vimeo
         /// publish.time
         /// modified_time</param>
         /// <returns></returns>
-        public JSONNode GetMyOnDemandPage(string type, int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetMyOnDemandPageAsync(string type, int? page = null, int? per_page = null,
             string sort = null)
         {
             var payload = new Dictionary<string, object>();
@@ -867,7 +868,7 @@ namespace RedCorners.Vimeo
             if (per_page != null) payload["per_page"] = per_page.Value.ToString();
             payload["type"] = type;
             if (sort != null) payload["sort"] = sort;
-            return Request("/me/ondemand/pages", payload, "GET", true);
+            return await RequestAsync("/me/ondemand/pages", payload, "GET", true);
         }
 
         /// <summary>
@@ -911,7 +912,7 @@ namespace RedCorners.Vimeo
         /// <param name="subscription_monthly_price_usd">Required if subscription.active is true.</param>
         /// <param name="accepted_currencies">List of accepted currencies.</param>
         /// <returns></returns>
-        public JSONNode CreateOnDemandPage(
+        public async Task<JSONNode> CreateOnDemandPageAsync(
             string name,
             string description,
             string type,
@@ -972,7 +973,7 @@ namespace RedCorners.Vimeo
             if (subscription_monthly_active.HasValue) payload["subscription.monthly.active"] = subscription_monthly_active.Value.ToString().ToLower();
             if (subscription_monthly_price_usd != null) payload["subscription.monthly.price.usd"] = subscription_monthly_price_usd;
             if (accepted_currencies != null) payload["accepted.currencies"] = accepted_currencies;
-            return Request("/me/ondemand/pages", payload, "POST", true);
+            return await RequestAsync("/me/ondemand/pages", payload, "POST", true);
         }
 
         /// <summary>
@@ -988,12 +989,12 @@ namespace RedCorners.Vimeo
         /// added
         /// date</param>
         /// <returns></returns>
-        public JSONNode GetMyOnDemandLibrary(string filter, string sort = null)
+        public async Task<JSONNode> GetMyOnDemandLibraryAsync(string filter, string sort = null)
         {
             var payload = new Dictionary<string, object>();
             payload["filter"] = filter;
             if (sort != null) payload["sort"] = sort;
-            return Request("/me/ondemand/library", payload, "GET", true);
+            return await RequestAsync("/me/ondemand/library", payload, "GET", true);
         }
 
         /// <summary>
@@ -1001,9 +1002,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="ondemandId"></param>
         /// <returns></returns>
-        public JSONNode GetMyOnDemandLibraryHasPage(string ondemandId)
+        public async Task<JSONNode> GetMyOnDemandLibraryHasPageAsync(string ondemandId)
         {
-            return Request(string.Format("/me/ondemand/library/{0}", ondemandId), null, "GET", true);
+            return await RequestAsync(string.Format("/me/ondemand/library/{0}", ondemandId), null, "GET", true);
         }
     }
 }

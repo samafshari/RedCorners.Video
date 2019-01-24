@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using SimpleJSON;
 namespace RedCorners.Vimeo
 {
@@ -21,7 +22,7 @@ namespace RedCorners.Vimeo
         /// <param name="filter">Filter to apply to the results.
         /// featured</param>
         /// <returns>200 OK</returns>
-        public JSONNode GetGroups(int? page = null, int? per_page = null, 
+        public async Task<JSONNode> GetGroupsAsync(int? page = null, int? per_page = null, 
             string query = null, string sort = null,
             string direction = null, string filter = null)
         {
@@ -32,7 +33,7 @@ namespace RedCorners.Vimeo
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
             if (filter != null) payload["filter"] = filter;
-            return Request("/groups", payload, "GET", true);
+            return await RequestAsync("/groups", payload, "GET", true);
         }
 
         /// <summary>
@@ -45,12 +46,12 @@ namespace RedCorners.Vimeo
         /// 400: If one of the parameters is invalid
         /// 200 OK
         /// </returns>
-        public JSONNode CreateGroups(string name, string description)
+        public async Task<JSONNode> CreateGroupsAsync(string name, string description)
         {
             var payload = new Dictionary<string, object>();
             payload["name"] = name;
             payload["description"] = description;
-            return Request("/groups", payload, "POST", true);
+            return await RequestAsync("/groups", payload, "POST", true);
         }
 
         /// <summary>
@@ -58,9 +59,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="groupId">Group ID</param>
         /// <returns>200 OK</returns>
-        public JSONNode GetGroup(int groupId)
+        public async Task<JSONNode> GetGroupAsync(int groupId)
         {
-            return Request(string.Format("/groups/{0}", groupId), null, "GET", true);
+            return await RequestAsync(string.Format("/groups/{0}", groupId), null, "GET", true);
         }
 
         /// <summary>
@@ -71,9 +72,9 @@ namespace RedCorners.Vimeo
         /// 403: If the authenticated user is not the Group owner
         /// 204 No Content
         /// </returns>
-        public JSONNode DeleteGroup(int groupId)
+        public async Task<JSONNode> DeleteGroupAsync(int groupId)
         {
-            return Request(string.Format("/groups/{0}", groupId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/groups/{0}", groupId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -95,7 +96,7 @@ namespace RedCorners.Vimeo
         /// 404 Not Found: If the Group cannot be found
         /// 200 OK
         /// </returns>
-        public JSONNode GetGroupUsers(int groupId, int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetGroupUsersAsync(int groupId, int? page = null, int? per_page = null,
             string query = null, string sort = null,
             string direction = null, string filter = null)
         {
@@ -106,7 +107,7 @@ namespace RedCorners.Vimeo
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
             if (filter != null) payload["filter"] = filter;
-            return Request(string.Format("/groups/{0}/users", groupId), null, "GET", true);
+            return await RequestAsync(string.Format("/groups/{0}/users", groupId), null, "GET", true);
         }
 
         /// <summary>
@@ -133,7 +134,7 @@ namespace RedCorners.Vimeo
         /// 400 Not Found: If the Group cannot be found
         /// 200 OK
         /// </returns>
-        public JSONNode GetGroupVideos(int groupId, int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetGroupVideosAsync(int groupId, int? page = null, int? per_page = null,
             string query = null, string filter = null,
             bool? filter_embeddable = null, string sort = null, string direction = null)
         {
@@ -145,7 +146,7 @@ namespace RedCorners.Vimeo
             if (filter_embeddable != null) payload["filter_embeddable"] = filter_embeddable.Value.ToString().ToLower();
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request(string.Format("/groups/{0}/videos", groupId), payload, "GET", true);
+            return await RequestAsync(string.Format("/groups/{0}/videos", groupId), payload, "GET", true);
         }
 
         /// <summary>
@@ -158,9 +159,9 @@ namespace RedCorners.Vimeo
         /// 404 Not Found: If the video cannot be found in the Group
         /// 204 No Content
         /// </returns>
-        public JSONNode GetGroupHasVideo(int groupId, int videoId)
+        public async Task<JSONNode> GetGroupHasVideoAsync(int groupId, int videoId)
         {
-            return Request(string.Format("/groups/{0}/videos/{1}", groupId, videoId), null, "GET", true);
+            return await RequestAsync(string.Format("/groups/{0}/videos/{1}", groupId, videoId), null, "GET", true);
         }
 
         /// <summary>
@@ -175,9 +176,9 @@ namespace RedCorners.Vimeo
         /// 202 Accepted: If the video is pending addition to the Group
         /// 204 No Content: If the video was successfully added to the Group
         /// </returns>
-        public JSONNode AddVideoToGroup(int groupId, int videoId)
+        public async Task<JSONNode> AddVideoToGroupAsync(int groupId, int videoId)
         {
-            return Request(string.Format("/groups/{0}/videos/{1}", groupId, videoId), null, "PUT", true);
+            return await RequestAsync(string.Format("/groups/{0}/videos/{1}", groupId, videoId), null, "PUT", true);
         }
 
         /// <summary>
@@ -190,9 +191,9 @@ namespace RedCorners.Vimeo
         /// 403: If the video is not allowed to be added to Groups
         /// 204 No Content
         /// </returns>
-        public JSONNode DeleteVideoFromGroup(int groupId, int videoId)
+        public async Task<JSONNode> DeleteVideoFromGroupAsync(int groupId, int videoId)
         {
-            return Request(string.Format("/groups/{0}/videos/{1}", groupId, videoId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/groups/{0}/videos/{1}", groupId, videoId), null, "DELETE", true);
         }
     }
 }

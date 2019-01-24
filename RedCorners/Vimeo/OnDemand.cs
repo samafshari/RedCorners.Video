@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using SimpleJSON;
 namespace RedCorners.Vimeo
 {
@@ -9,9 +10,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="ondemandId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandPage(string ondemandId)
+        public async Task<JSONNode> GetOnDemandPageAsync(string ondemandId)
         {
-            return Request(string.Format("/ondemand/pages/{0}", ondemandId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}", ondemandId), null, "GET", true);
         }
 
         /// <summary>
@@ -24,7 +25,7 @@ namespace RedCorners.Vimeo
         /// <param name="preorder_publish_time">Required if preorder.active is true. The time that the On Demand page will be published</param>
         /// <param name="publishWhenReady">This On Demand page will be automatically published when all videos are finished transcoding</param>
         /// <returns></returns>
-        public JSONNode EditOnDemandPage(string ondemandId,
+        public async Task<JSONNode> EditOnDemandPageAsync(string ondemandId,
             string link = null,
             bool? publish_active = null,
             bool? preorder_active = null,
@@ -37,7 +38,7 @@ namespace RedCorners.Vimeo
             if (preorder_active.HasValue) payload["preorder.active"] = preorder_active.Value.ToString().ToLower();
             if (preorder_publish_time.HasValue) payload["preorder.publish.time"] = preorder_publish_time.Value.ToString().ToLower();
             if (publishWhenReady.HasValue) payload["publish_when_ready"] = publishWhenReady.Value.ToString().ToLower();
-            return Request(string.Format("/ondemand/pages/{0}", ondemandId), payload, "PATCH", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}", ondemandId), payload, "PATCH", true);
         }
 
         /// <summary>
@@ -45,9 +46,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="ondemandId"></param>
         /// <returns></returns>
-        public JSONNode DeleteOnDemandPage(string ondemandId)
+        public async Task<JSONNode> DeleteOnDemandPageAsync(string ondemandId)
         {
-            return Request(string.Format("/ondemand/pages/{0}", ondemandId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}", ondemandId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -55,9 +56,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="ondemandId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandPageGenres(string ondemandId)
+        public async Task<JSONNode> GetOnDemandPageGenresAsync(string ondemandId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/genres", ondemandId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/genres", ondemandId), null, "GET", true);
         }
 
         /// <summary>
@@ -66,9 +67,9 @@ namespace RedCorners.Vimeo
         /// <param name="ondemandId"></param>
         /// <param name="genreId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandPageHasGenre(string ondemandId, string genreId)
+        public async Task<JSONNode> GetOnDemandPageHasGenreAsync(string ondemandId, string genreId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/genres/{1}", ondemandId, genreId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/genres/{1}", ondemandId, genreId), null, "GET", true);
         }
 
         /// <summary>
@@ -77,9 +78,9 @@ namespace RedCorners.Vimeo
         /// <param name="ondemandId"></param>
         /// <param name="genreId"></param>
         /// <returns></returns>
-        public JSONNode AddGenreToOnDemandPage(string ondemandId, string genreId)
+        public async Task<JSONNode> AddGenreToOnDemandPageAsync(string ondemandId, string genreId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/genres/{1}", ondemandId, genreId), null, "PUT", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/genres/{1}", ondemandId, genreId), null, "PUT", true);
         }
 
         /// <summary>
@@ -88,9 +89,9 @@ namespace RedCorners.Vimeo
         /// <param name="ondemandId"></param>
         /// <param name="genreId"></param>
         /// <returns></returns>
-        public JSONNode DeleteGenreFromOnDemandPage(string ondemandId, string genreId)
+        public async Task<JSONNode> DeleteGenreFromOnDemandPageAsync(string ondemandId, string genreId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/genres/{1}", ondemandId, genreId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/genres/{1}", ondemandId, genreId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -98,9 +99,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="ondemandId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandPageRegions(string ondemandId)
+        public async Task<JSONNode> GetOnDemandPageRegionsAsync(string ondemandId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/regions", ondemandId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/regions", ondemandId), null, "GET", true);
         }
 
         /// <summary>
@@ -109,9 +110,9 @@ namespace RedCorners.Vimeo
         /// <param name="ondemandId"></param>
         /// <param name="regionId"></param>
         /// <returns></returns>
-        public JSONNode AddRegionToOnDemandPage(string ondemandId, string regionId)
+        public async Task<JSONNode> AddRegionToOnDemandPageAsync(string ondemandId, string regionId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/regions/{1}", ondemandId, regionId), null, "PUT", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/regions/{1}", ondemandId, regionId), null, "PUT", true);
         }
 
         /// <summary>
@@ -120,9 +121,9 @@ namespace RedCorners.Vimeo
         /// <param name="ondemandId"></param>
         /// <param name="regionId"></param>
         /// <returns></returns>
-        public JSONNode DeleteRegionFromOnDemandPage(string ondemandId, string regionId)
+        public async Task<JSONNode> DeleteRegionFromOnDemandPageAsync(string ondemandId, string regionId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/regions/{1}", ondemandId, regionId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/regions/{1}", ondemandId, regionId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -131,9 +132,9 @@ namespace RedCorners.Vimeo
         /// <param name="ondemandId"></param>
         /// <param name="regionId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandPageHasRegion(string ondemandId, string regionId)
+        public async Task<JSONNode> GetOnDemandPageHasRegionAsync(string ondemandId, string regionId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/regions/{1}", ondemandId, regionId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/regions/{1}", ondemandId, regionId), null, "GET", true);
         }
 
         /// <summary>
@@ -141,9 +142,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="ondemandId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandPagePictures(string ondemandId)
+        public async Task<JSONNode> GetOnDemandPagePicturesAsync(string ondemandId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/pictures", ondemandId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/pictures", ondemandId), null, "GET", true);
         }
 
         /// <summary>
@@ -151,9 +152,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="ondemandId"></param>
         /// <returns></returns>
-        public JSONNode CreatePictureForOnDemandPage(string ondemandId)
+        public async Task<JSONNode> CreatePictureForOnDemandPageAsync(string ondemandId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/pictures", ondemandId), null, "POST", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/pictures", ondemandId), null, "POST", true);
         }
 
         /// <summary>
@@ -162,9 +163,9 @@ namespace RedCorners.Vimeo
         /// <param name="ondemandId"></param>
         /// <param name="posterId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandPagePicture(string ondemandId, string posterId)
+        public async Task<JSONNode> GetOnDemandPagePictureAsync(string ondemandId, string posterId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/pictures/{1}", ondemandId, posterId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/pictures/{1}", ondemandId, posterId), null, "GET", true);
         }
 
         /// <summary>
@@ -174,11 +175,11 @@ namespace RedCorners.Vimeo
         /// <param name="posterId"></param>
         /// <param name="active">Set this picture as the active picture</param>
         /// <returns></returns>
-        public JSONNode EditOnDemandPagePicture(string ondemandId, string posterId, bool active)
+        public async Task<JSONNode> EditOnDemandPagePictureAsync(string ondemandId, string posterId, bool active)
         {
             var payload = new Dictionary<string, object>();
             payload["active"] = active.ToString().ToLower();
-            return Request(string.Format("/ondemand/pages/{0}/pictures/{1}", ondemandId, posterId), payload, "PATCH", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/pictures/{1}", ondemandId, posterId), payload, "PATCH", true);
         }
 
         /// <summary>
@@ -186,9 +187,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="ondemandId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandPageBackgrounds(string ondemandId)
+        public async Task<JSONNode> GetOnDemandPageBackgroundsAsync(string ondemandId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/backgrounds", ondemandId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/backgrounds", ondemandId), null, "GET", true);
         }
 
         /// <summary>
@@ -196,9 +197,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="ondemandId"></param>
         /// <returns></returns>
-        public JSONNode CreateBackgroundForOnDemandPage(string ondemandId)
+        public async Task<JSONNode> CreateBackgroundForOnDemandPageAsync(string ondemandId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/backgrounds", ondemandId), null, "POST", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/backgrounds", ondemandId), null, "POST", true);
         }
 
         /// <summary>
@@ -207,9 +208,9 @@ namespace RedCorners.Vimeo
         /// <param name="ondemandId"></param>
         /// <param name="backgroundId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandPageBackground(string ondemandId, string backgroundId)
+        public async Task<JSONNode> GetOnDemandPageBackgroundAsync(string ondemandId, string backgroundId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/backgrounds/{1}", ondemandId, backgroundId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/backgrounds/{1}", ondemandId, backgroundId), null, "GET", true);
         }
 
         /// <summary>
@@ -219,11 +220,11 @@ namespace RedCorners.Vimeo
         /// <param name="backgroundId"></param>
         /// <param name="active">Set this background as the active background</param>
         /// <returns></returns>
-        public JSONNode EditOnDemandPageBackground(string ondemandId, string backgroundId, bool active)
+        public async Task<JSONNode> EditOnDemandPageBackgroundAsync(string ondemandId, string backgroundId, bool active)
         {
             var payload = new Dictionary<string, object>();
             payload["active"] = active.ToString().ToLower();
-            return Request(string.Format("/ondemand/pages/{0}/backgrounds/{1}", ondemandId, backgroundId), payload, "PATCH", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/backgrounds/{1}", ondemandId, backgroundId), payload, "PATCH", true);
         }
 
         /// <summary>
@@ -232,9 +233,9 @@ namespace RedCorners.Vimeo
         /// <param name="ondemandId"></param>
         /// <param name="backgroundId"></param>
         /// <returns></returns>
-        public JSONNode DeleteOnDemandPageBackground(string ondemandId, string backgroundId)
+        public async Task<JSONNode> DeleteOnDemandPageBackgroundAsync(string ondemandId, string backgroundId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/backgrounds/{1}", ondemandId, backgroundId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/backgrounds/{1}", ondemandId, backgroundId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -251,12 +252,12 @@ namespace RedCorners.Vimeo
         /// default
         /// manual</param>
         /// <returns></returns>
-        public JSONNode GetOnDemandPageVideos(string ondemandId, string filter = null, string sort = null)
+        public async Task<JSONNode> GetOnDemandPageVideosAsync(string ondemandId, string filter = null, string sort = null)
         {
             var payload = new Dictionary<string, object>();
             if (filter != null) payload["filter"] = filter;
             if (sort != null) payload["sort"] = sort;
-            return Request(string.Format("/ondemand/pages/{0}/videos", ondemandId), payload, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/videos", ondemandId), payload, "GET", true);
         }
 
         /// <summary>
@@ -265,9 +266,9 @@ namespace RedCorners.Vimeo
         /// <param name="ondemandId"></param>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandPageHasVideo(string ondemandId, string videoId)
+        public async Task<JSONNode> GetOnDemandPageHasVideoAsync(string ondemandId, string videoId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/videos/{1}", ondemandId, videoId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/videos/{1}", ondemandId, videoId), null, "GET", true);
         }
 
         /// <summary>
@@ -292,7 +293,7 @@ namespace RedCorners.Vimeo
         /// <param name="position">The position this video will appear in this ondemand's video collection.</param>
         /// <param name="release_year">The video release year.</param>
         /// <returns></returns>
-        public JSONNode AddVideoToOnDemandPage(string ondemandId, string videoId, string type,
+        public async Task<JSONNode> AddVideoToOnDemandPageAsync(string ondemandId, string videoId, string type,
             string rent_price_usd = null,
             string rent_price_gbp = null,
             string rent_price_eur = null,
@@ -320,7 +321,7 @@ namespace RedCorners.Vimeo
             if (buy_price_aud != null) payload["buy.price.aud"] = buy_price_aud;
             if (position != null) payload["position"] = position;
             if (release_year.HasValue) payload["release_year"] = release_year.Value.ToString();
-            return Request(string.Format("/ondemand/pages/{0}/videos/{1}", ondemandId, videoId), payload, "PUT", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/videos/{1}", ondemandId, videoId), payload, "PUT", true);
         }
 
         /// <summary>
@@ -329,18 +330,18 @@ namespace RedCorners.Vimeo
         /// <param name="ondemandId"></param>
         /// <param name="videoId"></param>
         /// <returns></returns>
-        public JSONNode DeleteVideoFromOnDemandPage(string ondemandId, string videoId)
+        public async Task<JSONNode> DeleteVideoFromOnDemandPageAsync(string ondemandId, string videoId)
         {
-            return Request(string.Format("/ondemand/pages/{0}/videos/{1}", ondemandId, videoId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/ondemand/pages/{0}/videos/{1}", ondemandId, videoId), null, "DELETE", true);
         }
 
         /// <summary>
         /// View all On Demand Genres.
         /// </summary>
         /// <returns></returns>
-        public JSONNode GetOnDemandGenres()
+        public async Task<JSONNode> GetOnDemandGenresAsync()
         {
-            return Request("/ondemand/genres", null, "GET", true);
+            return await RequestAsync("/ondemand/genres", null, "GET", true);
         }
 
         /// <summary>
@@ -348,9 +349,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="genreId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandGenre(string genreId)
+        public async Task<JSONNode> GetOnDemandGenreAsync(string genreId)
         {
-            return Request(string.Format("/ondemand/genres/{0}", genreId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/genres/{0}", genreId), null, "GET", true);
         }
 
         /// <summary>
@@ -364,12 +365,12 @@ namespace RedCorners.Vimeo
         /// video
         /// publish.time</param>
         /// <returns></returns>
-        public JSONNode GetOnDemandGenrePages(string genreId, string filter = null, string sort = null)
+        public async Task<JSONNode> GetOnDemandGenrePagesAsync(string genreId, string filter = null, string sort = null)
         {
             var payload = new Dictionary<string, object>();
             if (filter != null) payload["filter"] = filter;
             if (sort != null) payload["sort"] = sort;
-            return Request(string.Format("/ondemand/genres/{0}/pages", genreId), payload, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/genres/{0}/pages", genreId), payload, "GET", true);
         }
 
         /// <summary>
@@ -378,18 +379,18 @@ namespace RedCorners.Vimeo
         /// <param name="genreId"></param>
         /// <param name="ondemandId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandGenreHasPage(string genreId, string ondemandId)
+        public async Task<JSONNode> GetOnDemandGenreHasPageAsync(string genreId, string ondemandId)
         {
-            return Request(string.Format("/ondemand/genres/{0}/pages/{1}", genreId, ondemandId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/genres/{0}/pages/{1}", genreId, ondemandId), null, "GET", true);
         }
 
         /// <summary>
         /// Get all On Demand Regions.
         /// </summary>
         /// <returns></returns>
-        public JSONNode GetOnDemandRegions()
+        public async Task<JSONNode> GetOnDemandRegionsAsync()
         {
-            return Request("/ondemand/regions", null, "GET", true);
+            return await RequestAsync("/ondemand/regions", null, "GET", true);
         }
 
         /// <summary>
@@ -397,9 +398,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="countryId"></param>
         /// <returns></returns>
-        public JSONNode GetOnDemandRegion(string countryId)
+        public async Task<JSONNode> GetOnDemandRegionAsync(string countryId)
         {
-            return Request(string.Format("/ondemand/regions/{0}", countryId), null, "GET", true);
+            return await RequestAsync(string.Format("/ondemand/regions/{0}", countryId), null, "GET", true);
         }
     }
 }

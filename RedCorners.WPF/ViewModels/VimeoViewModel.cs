@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RedCorners.Vimeo;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -12,6 +13,8 @@ namespace RedCorners.WPF.ViewModels
 {
     public class VimeoViewModel : INotifyPropertyChanged
     {
+        VimeoHook hook = null;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -118,7 +121,8 @@ namespace RedCorners.WPF.ViewModels
             AuthenticatingVisibility = Visibility.Visible;
             try
             {
-                Token = await Vimeo.VimeoHook.Authorize(AccessCode, ClientId, ClientSecret, RedirectUrl)
+                hook = await VimeoHook.AuthorizeAsync(AccessCode, ClientId, ClientSecret, RedirectUrl);
+                Token = hook.AccessToken;
             }
             finally
             {

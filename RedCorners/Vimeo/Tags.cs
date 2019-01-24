@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using SimpleJSON;
 namespace RedCorners.Vimeo
 {
@@ -9,9 +10,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="word"></param>
         /// <returns></returns>
-        public JSONNode GetTag(string word)
+        public async Task<JSONNode> GetTagAsync(string word)
         {
-            return Request(string.Format("/tags/{0}", word), null, "GET", true);
+            return await RequestAsync(string.Format("/tags/{0}", word), null, "GET", true);
         }
 
         /// <summary>
@@ -29,7 +30,7 @@ namespace RedCorners.Vimeo
         /// asc
         /// desc</param>
         /// <returns></returns>
-        public JSONNode GetVideosForTag(string word,
+        public async Task<JSONNode> GetVideosForTagAsync(string word,
             int? page = null, int? per_page = null,
             string query = null, string sort = null, string direction = null)
         {
@@ -38,7 +39,7 @@ namespace RedCorners.Vimeo
             if (per_page != null) payload["per_page"] = per_page.Value.ToString();
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request(string.Format("/tags/{0}/videos", word), payload, "GET", true);
+            return await RequestAsync(string.Format("/tags/{0}/videos", word), payload, "GET", true);
         }
     }
 }
