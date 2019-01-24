@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using SimpleJSON;
 namespace RedCorners.Vimeo
 {
@@ -10,12 +11,12 @@ namespace RedCorners.Vimeo
         /// <param name="page">The page number to show.</param>
         /// <param name="per_page">Number of items to show on each page. Max 50.</param>
         /// <returns></returns>
-        public JSONNode GetCategories(int? page = null, int? per_page = null)
+        public async Task<JSONNode> GetCategoriesAsync(int? page = null, int? per_page = null)
         {
             var payload = new Dictionary<string, object>();
             if (page != null) payload["page"] = page.Value.ToString();
             if (per_page != null) payload["per_page"] = per_page.Value.ToString();
-            return Request("/categories", payload, "GET", true);
+            return await RequestAsync("/categories", payload, "GET", true);
         }
 
         /// <summary>
@@ -26,9 +27,9 @@ namespace RedCorners.Vimeo
         /// 404 Not Found: If the category cannot be found
         /// 200 OK
         /// </returns>
-        public JSONNode GetCategory(int categoryId)
+        public async Task<JSONNode> GetCategoryAsync(int categoryId)
         {
-            return Request(string.Format("/categories/{0}", categoryId), null, "GET", true);
+            return await RequestAsync(string.Format("/categories/{0}", categoryId), null, "GET", true);
         }
 
         /// <summary>
@@ -52,7 +53,7 @@ namespace RedCorners.Vimeo
         /// 404 Not Found: If the category cannot be found
         /// 200 OK
         /// </returns>
-        public JSONNode GetCategoryChannels(int categoryId,
+        public async Task<JSONNode> GetCategoryChannelsAsync(int categoryId,
             int? page = null, int? per_page = null, string query = null, string sort = null,
             string direction = null)
         {
@@ -62,7 +63,7 @@ namespace RedCorners.Vimeo
             if (query != null) payload["query"] = query;
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request(string.Format("/categories/{0}/channels", categoryId), payload, "GET", true);
+            return await RequestAsync(string.Format("/categories/{0}/channels", categoryId), payload, "GET", true);
         }
 
         /// <summary>
@@ -86,7 +87,7 @@ namespace RedCorners.Vimeo
         /// 404 Not Found: If the category cannot be found
         /// 200 OK
         /// </returns>
-        public JSONNode GetCategoryGroups(int categoryId,
+        public async Task<JSONNode> GetCategoryGroupsAsync(int categoryId,
             int? page = null, int? per_page = null, string query = null, string sort = null,
             string direction = null)
         {
@@ -96,7 +97,7 @@ namespace RedCorners.Vimeo
             if (query != null) payload["query"] = query;
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request(string.Format("/categories/{0}/groups", categoryId), payload, "GET", true);
+            return await RequestAsync(string.Format("/categories/{0}/groups", categoryId), payload, "GET", true);
         }
 
         /// <summary>
@@ -125,7 +126,7 @@ namespace RedCorners.Vimeo
         /// 404 Not Found: If the category cannot be found
         /// 200 OK
         /// </returns>
-        public JSONNode GetCategoryVideos(int categoryId,
+        public async Task<JSONNode> GetCategoryVideosAsync(int categoryId,
             int? page = null, int? per_page = null, string query = null, string filter = null,
             bool? filter_embeddable = null, string sort = null, string direction = null)
         {
@@ -137,7 +138,7 @@ namespace RedCorners.Vimeo
             if (filter_embeddable != null) payload["filter_embeddable"] = filter_embeddable.Value.ToString().ToLower();
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request(string.Format("/categories/{0}/videos", categoryId), payload, "GET", true);
+            return await RequestAsync(string.Format("/categories/{0}/videos", categoryId), payload, "GET", true);
         }
 
         /// <summary>
@@ -149,9 +150,9 @@ namespace RedCorners.Vimeo
         /// 404 Not Found: If the category cannot be found
         /// 200 OK
         /// </returns>
-        public JSONNode GetCategoryHasVideo(int categoryId, int videoId)
+        public async Task<JSONNode> GetCategoryHasVideoAsync(int categoryId, int videoId)
         {
-            return Request(string.Format("/categories/{0}/videos/{1}", categoryId, videoId), null, "GET", true);
+            return await RequestAsync(string.Format("/categories/{0}/videos/{1}", categoryId, videoId), null, "GET", true);
         }
     }
 }
