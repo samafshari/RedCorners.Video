@@ -66,17 +66,28 @@ namespace RedCorners.WPF.ViewModels
             }
         }
 
-        public string AccessCode { get; set; }
+        public string AuthCode { get; set; }
 
         public string Token { get; set; }
 
-        Visibility _authenticatingVisibility = Visibility.Collapsed;
-        public Visibility AuthenticatingVisibility
+        string _userInfo = "Not Logged In";
+        public string UserInfo
         {
-            get => _authenticatingVisibility;
+            get => _userInfo;
             set
             {
-                _authenticatingVisibility = value;
+                _userInfo = value;
+                OnPropertyChanged();
+            }
+        }
+
+        Visibility _authorizingVisibility = Visibility.Collapsed;
+        public Visibility AuthorizingVisibility
+        {
+            get => _authorizingVisibility;
+            set
+            {
+                _authorizingVisibility = value;
                 OnPropertyChanged();
             }
         }
@@ -107,27 +118,58 @@ namespace RedCorners.WPF.ViewModels
             Process.Start(psi);
         });
 
-        public Command AuthenticateCommand => new Command(async () =>
+        public Command AuthorizeCommand => new Command(async () =>
         {
-            if (AuthenticatingVisibility == Visibility.Visible)
+            if (AuthorizingVisibility == Visibility.Visible)
                 return;
 
-            if (string.IsNullOrWhiteSpace(AccessCode))
+            if (string.IsNullOrWhiteSpace(AuthCode))
             {
                 MessageBox.Show("Error: Access Code is empty.");
                 return;
             }
 
-            AuthenticatingVisibility = Visibility.Visible;
+            AuthorizingVisibility = Visibility.Visible;
             try
             {
-                hook = await VimeoHook.AuthorizeAsync(AccessCode, ClientId, ClientSecret, RedirectUrl);
+                hook = await VimeoHook.AuthorizeAsync(AuthCode, ClientId, ClientSecret, RedirectUrl);
                 Token = hook.AccessToken;
+                AppSettings.Default.VimeoToken = Token;
+                AppSettings.Default.Save();
+                AfterAuthorize();
             }
             finally
             {
-                AuthenticatingVisibility = Visibility.Collapsed;
+                AuthorizingVisibility = Visibility.Collapsed;
             }
         });
+
+        public Command ReauthorizeCommand => new Command(async () =>
+        {
+            if (AuthorizingVisibility == Visibility.Visible)
+                return;
+
+            if (string.IsNullOrWhiteSpace(Token))
+            {
+                MessageBox.Show("Error: Access Token is empty.");
+                return;
+            }
+
+            AuthorizingVisibility = Visibility.Visible;
+            try
+            {
+                hook = await VimeoHook.ReAuthorizeAsync(Token, ClientId, RedirectUrl);
+                AfterAuthorize();
+            }
+            finally
+            {
+                AuthorizingVisibility = Visibility.Collapsed;
+            }
+        });
+
+        void AfterAuthorize()
+        {
+            UserInfo = hook.User.ToString();
+        }
     }
 }
