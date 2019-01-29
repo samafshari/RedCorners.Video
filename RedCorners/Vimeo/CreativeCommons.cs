@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using SimpleJSON;
 namespace RedCorners.Vimeo
 {
@@ -8,9 +9,9 @@ namespace RedCorners.Vimeo
         /// Get all valid creative commons licenses
         /// </summary>
         /// <returns></returns>
-        public JSONNode GetCreativeCommons()
+        public async Task<JSONNode> GetCreativeCommonsAsync()
         {
-            return Request("/creativecommons", null, "GET", true);
+            return await RequestAsync("/creativecommons", null, "GET", true);
         }
     }
 }

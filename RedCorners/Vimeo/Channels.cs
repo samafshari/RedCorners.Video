@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using SimpleJSON;
 namespace RedCorners.Vimeo
 {
@@ -24,7 +25,7 @@ namespace RedCorners.Vimeo
         /// 404: If relevant sort is provided without a search query
         /// 200: OK
         /// </returns>
-        public JSONNode GetChannels(int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetChannelsAsync(int? page = null, int? per_page = null,
             string query = null, string sort = null, string direction = null, string filter = null)
         {
             var payload = new Dictionary<string, object>();
@@ -34,7 +35,7 @@ namespace RedCorners.Vimeo
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
             if (filter != null) payload["filter"] = filter;
-            return Request("/channels", payload, "GET", true);
+            return await RequestAsync("/channels", payload, "GET", true);
         }
 
         /// <summary>
@@ -48,13 +49,13 @@ namespace RedCorners.Vimeo
         /// 403: If the authenticated user can not create a Channel
         /// 201: Created
         /// </returns>
-        public JSONNode CreateChannel(string name, string description, string privacy)
+        public async Task<JSONNode> CreateChannelAsync(string name, string description, string privacy)
         {
             var payload = new Dictionary<string, object>();
             payload["name"] = name;
             payload["description"] = description;
             payload["privacy"] = privacy;
-            return Request("/channels", payload, "POST", true);
+            return await RequestAsync("/channels", payload, "POST", true);
         }
 
         /// <summary>
@@ -62,9 +63,9 @@ namespace RedCorners.Vimeo
         /// </summary>
         /// <param name="channelId">Channel ID</param>
         /// <returns>200 OK</returns>
-        public JSONNode GetChannel(int channelId)
+        public async Task<JSONNode> GetChannelAsync(int channelId)
         {
-            return Request(string.Format("/channels/{0}", channelId), null, "GET", true);
+            return await RequestAsync(string.Format("/channels/{0}", channelId), null, "GET", true);
         }
 
         /// <summary>
@@ -78,13 +79,13 @@ namespace RedCorners.Vimeo
         /// 400: If an invalid parameter is supplied
         /// 204: No Content
         /// </returns>
-        public JSONNode EditChannel(int channelId, string name, string description, string privacy)
+        public async Task<JSONNode> EditChannelAsync(int channelId, string name, string description, string privacy)
         {
             var payload = new Dictionary<string, object>();
             if (name != null) payload["name"] = name;
             if (description != null) payload["description"] = description;
             if (privacy != null) payload["privacy"] = privacy;
-            return Request(string.Format("/channels/{0}", channelId), payload, "POST", true);
+            return await RequestAsync(string.Format("/channels/{0}", channelId), payload, "POST", true);
         }
 
         /// <summary>
@@ -95,9 +96,9 @@ namespace RedCorners.Vimeo
         /// 403: If this user is not Channel owner
         /// 204: No Content
         /// </returns>
-        public JSONNode DeleteChannel(int channelId)
+        public async Task<JSONNode> DeleteChannelAsync(int channelId)
         {
-            return Request(string.Format("/channels/{0}", channelId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/channels/{0}", channelId), null, "DELETE", true);
         }
 
         /// <summary>
@@ -119,7 +120,7 @@ namespace RedCorners.Vimeo
         /// 400: If a search query is provided without the `moderators` filter. This feature is not yet supported.
         /// 200 OK
         /// </returns>
-        public JSONNode GetChannelUsers(int channelId, int? page = null, int? per_page = null,
+        public async Task<JSONNode> GetChannelUsersAsync(int channelId, int? page = null, int? per_page = null,
             string query = null, string sort = null, string direction = null, string filter = null)
         {
             var payload = new Dictionary<string, object>();
@@ -129,7 +130,7 @@ namespace RedCorners.Vimeo
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
             if (filter != null) payload["filter"] = filter;
-            return Request(string.Format("/channels/{0}/users", channelId), payload, "GET", true);
+            return await RequestAsync(string.Format("/channels/{0}/users", channelId), payload, "GET", true);
         }
 
         /// <summary>
@@ -161,7 +162,7 @@ namespace RedCorners.Vimeo
         /// 304 Not Modified: If no videos were added to this Channel since the provided If-Modified-Since header
         /// 200 OK
         /// </returns>
-        public JSONNode GetChannelVideos(int channelId, int? page = null, int? per_page = null, 
+        public async Task<JSONNode> GetChannelVideosAsync(int channelId, int? page = null, int? per_page = null, 
             string query = null, string filter = null,
             bool? filter_embeddable = null, string sort = null, string direction = null)
         {
@@ -173,7 +174,7 @@ namespace RedCorners.Vimeo
             if (filter_embeddable != null) payload["filter_embeddable"] = filter_embeddable.Value.ToString().ToLower();
             if (sort != null) payload["sort"] = sort;
             if (direction != null) payload["direction"] = direction;
-            return Request(string.Format("/channels/{0}/videos", channelId), payload, "GET", true);
+            return await RequestAsync(string.Format("/channels/{0}/videos", channelId), payload, "GET", true);
         }
 
         /// <summary>
@@ -185,9 +186,9 @@ namespace RedCorners.Vimeo
         /// 404 Not Found: If the Channel cannot be found
         /// 200 OK
         /// </returns>
-        public JSONNode GetChannelHasVideo(int channelId, int videoId)
+        public async Task<JSONNode> GetChannelHasVideoAsync(int channelId, int videoId)
         {
-            return Request(string.Format("/channels/{0}/videos/{1}", channelId, videoId), null, "GET", true);
+            return await RequestAsync(string.Format("/channels/{0}/videos/{1}", channelId, videoId), null, "GET", true);
         }
 
         /// <summary>
@@ -201,9 +202,9 @@ namespace RedCorners.Vimeo
         /// 403: If the video is restricted from being added to Channels
         /// 204 No Content
         /// </returns>
-        public JSONNode AddVideoToChannel(int channelId, int videoId)
+        public async Task<JSONNode> AddVideoToChannelAsync(int channelId, int videoId)
         {
-            return Request(string.Format("/channels/{0}/videos/{1}", channelId, videoId), null, "PUT", true);
+            return await RequestAsync(string.Format("/channels/{0}/videos/{1}", channelId, videoId), null, "PUT", true);
         }
 
         /// <summary>
@@ -217,9 +218,9 @@ namespace RedCorners.Vimeo
         /// 403: If the authenticated user is not a moderator of the Channel
         /// 204 No Content
         /// </returns>
-        public JSONNode DeleteVideoFromChannel(int channelId, int videoId)
+        public async Task<JSONNode> DeleteVideoFromChannelAsync(int channelId, int videoId)
         {
-            return Request(string.Format("/channels/{0}/videos/{1}", channelId, videoId), null, "DELETE", true);
+            return await RequestAsync(string.Format("/channels/{0}/videos/{1}", channelId, videoId), null, "DELETE", true);
         }
     }
 }

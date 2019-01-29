@@ -61,15 +61,40 @@
             </Grid>
 
             <TextBlock>
-                <Run FontWeight="Bold">Step 3:</Run>
-                <Run>Once you're done, enter the code into the box below, and press Authenticate.</Run>
+                <Run FontWeight="Bold">Step 3 (A):</Run>
+                <Run>Once you're done, enter the code into the box below, and press Authorize.</Run>
             </TextBlock>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Text="{Binding AuthCode}" />
+                <Button Grid.Column="1" Content="Authorize" Command="{Binding AuthorizeCommand}" />
             </Grid>
+
+            <TextBlock>
+                <Run FontWeight="Bold">Step 3 (B):</Run>
+                <Run>If you already have an Access Token, enter it into the box below, and press Reauthorize.</Run>
+            </TextBlock>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Text="{Binding Token}" />
+                <Button Grid.Column="1" Content="Reauthorize" Command="{Binding ReauthorizeCommand}" />
+            </Grid>
+
+            <Grid Visibility="{Binding AuthorizingVisibility}">
+                <ProgressBar IsIndeterminate="True" Height="20" />
+            </Grid>
+
+            <TextBlock>
+                <Run FontWeight="Bold">Step 4:</Run>
+                <Run>If the authorization is successful, you should be able to see your account information below:</Run>
+            </TextBlock>
+            <TextBlock Foreground="DarkGray" Text="{Binding UserInfo}" TextWrapping="Wrap" />
         </StackPanel>
     </Grid>
 </Window>

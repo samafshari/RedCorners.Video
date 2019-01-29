@@ -420,13 +420,18 @@ namespace RedCorners
                         //HTTPS
                         tcpClient.Connect(uri.Host, 443);
                         ServicePointManager.ServerCertificateValidationCallback += new RemoteCertificateValidationCallback((sender, certificate, chain, policyErrors) => true);
+                        ServicePointManager.Expect100Continue = true;
+                        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                               | SecurityProtocolType.Tls11
+                               | SecurityProtocolType.Tls12
+                               | SecurityProtocolType.Ssl3;
 
                         //This has a bug on mono: Message	"The authentication or decryption has failed."
                         //Therefore unfortunately we have to ignore certificates.
                         using (var s = new SslStream(tcpClient.GetStream(), false,
                             new RemoteCertificateValidationCallback((sender, certificate, chain, policyErrors) => true)))
                         {
-                            s.AuthenticateAsClient(uri.Host, null, SslProtocols.Tls, false);
+                            s.AuthenticateAsClient(uri.Host, null, SslProtocols.Tls12, false);
                             if (UpstreamCallback != null && UpstreamCallbackRate > 0)
                             {
                                 int i = 0;

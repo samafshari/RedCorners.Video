@@ -14,6 +14,7 @@ namespace RedCorners.WPF.ViewModels
         {
             _action = action;
             _canExecute = canExecute;
+            CanExecuteChanged?.Invoke(this, null);
         }
 
         public bool CanExecute(object parameter)
