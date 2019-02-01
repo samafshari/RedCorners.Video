@@ -11,90 +11,108 @@
         <vm:VimeoViewModel />
     </Window.DataContext>
     <Grid>
-        <StackPanel Margin="10">
-            <StackPanel.Resources>
-                <ResourceDictionary>
-                    <Style TargetType="Grid">
-                        <Setter Property="Margin" Value="10" />
-                    </Style>
+        <ScrollViewer>
+            <StackPanel Margin="10">
+                <StackPanel.Resources>
+                    <ResourceDictionary>
+                        <Style TargetType="Grid">
+                            <Setter Property="Margin" Value="10" />
+                        </Style>
 
-                    <Style TargetType="TextBlock">
-                        <Setter Property="Margin" Value="0,10,0,0" />
-                    </Style>
-                </ResourceDictionary>
-            </StackPanel.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Margin" Value="0,10,0,0" />
+                        </Style>
+                    </ResourceDictionary>
+                </StackPanel.Resources>
             
-            <TextBlock>
-                <Run FontWeight="Bold">Step 1:</Run>
-                <Run>You have to configure your Vimeo API keys here.</Run>
-            </TextBlock>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Label Grid.Row="0" Grid.Column="0" Content="Client ID:" />
-                <Label Grid.Row="1" Grid.Column="0" Content="Client Secret:" />
-                <Label Grid.Row="2" Grid.Column="0" Content="Redirect URL:" />
+                <TextBlock>
+                    <Run FontWeight="Bold">Step 1:</Run>
+                    <Run>You have to configure your Vimeo API keys here.</Run>
+                </TextBlock>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0" Content="Client ID:" />
+                    <Label Grid.Row="1" Grid.Column="0" Content="Client Secret:" />
+                    <Label Grid.Row="2" Grid.Column="0" Content="Redirect URL:" />
                 
-                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ClientId}" />
-                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ClientSecret}" />
-                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding RedirectUrl}" />
-            </Grid>
+                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ClientId}" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ClientSecret}" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding RedirectUrl}" />
+                </Grid>
 
-            <TextBlock>
-                <Run FontWeight="Bold">Step 2:</Run>
-                <Run>You need to log in with your account, by following this link:</Run>
-            </TextBlock>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Text="{Binding LoginUrl, Mode=OneWay}" IsReadOnly="True" />
-                <Button Grid.Column="1" Content="Open in Browser" Command="{Binding OpenLoginUrlCommand}" />
-            </Grid>
+                <TextBlock>
+                    <Run FontWeight="Bold">Step 2:</Run>
+                    <Run>You need to log in with your account, by following this link:</Run>
+                </TextBlock>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Text="{Binding LoginUrl, Mode=OneWay}" IsReadOnly="True" />
+                    <Button Grid.Column="1" Content="Open in Browser" Command="{Binding OpenLoginUrlCommand}" />
+                </Grid>
 
-            <TextBlock>
-                <Run FontWeight="Bold">Step 3 (A):</Run>
-                <Run>Once you're done, enter the code into the box below, and press Authorize.</Run>
-            </TextBlock>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Text="{Binding AuthCode}" />
-                <Button Grid.Column="1" Content="Authorize" Command="{Binding AuthorizeCommand}" />
-            </Grid>
+                <TextBlock>
+                    <Run FontWeight="Bold">Step 3 (A):</Run>
+                    <Run>Once you're done, enter the code into the box below, and press Authorize.</Run>
+                </TextBlock>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Text="{Binding AuthCode}" />
+                    <Button Grid.Column="1" Content="Authorize" Command="{Binding AuthorizeCommand}" />
+                </Grid>
 
-            <TextBlock>
-                <Run FontWeight="Bold">Step 3 (B):</Run>
-                <Run>If you already have an Access Token, enter it into the box below, and press Reauthorize.</Run>
-            </TextBlock>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBox Grid.Column="0" Text="{Binding Token}" />
-                <Button Grid.Column="1" Content="Reauthorize" Command="{Binding ReauthorizeCommand}" />
-            </Grid>
+                <TextBlock>
+                    <Run FontWeight="Bold">Step 3 (B):</Run>
+                    <Run>If you already have an Access Token, enter it into the box below, and press Reauthorize.</Run>
+                </TextBlock>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Text="{Binding Token}" />
+                    <Button Grid.Column="1" Content="Reauthorize" Command="{Binding ReauthorizeCommand}" />
+                </Grid>
 
-            <Grid Visibility="{Binding AuthorizingVisibility}">
-                <ProgressBar IsIndeterminate="True" Height="20" />
-            </Grid>
+                <Grid Visibility="{Binding AuthorizingVisibility}">
+                    <ProgressBar IsIndeterminate="True" Height="20" />
+                </Grid>
 
-            <TextBlock>
-                <Run FontWeight="Bold">Step 4:</Run>
-                <Run>If the authorization is successful, you should be able to see your account information below:</Run>
-            </TextBlock>
-            <TextBlock Foreground="DarkGray" Text="{Binding UserInfo}" TextWrapping="Wrap" />
-        </StackPanel>
+                <TextBlock>
+                    <Run FontWeight="Bold">Step 4:</Run>
+                    <Run>If the authorization is successful, you should be able to see your account information below:</Run>
+                </TextBlock>
+                <TextBlock Foreground="DarkGray" Text="{Binding UserInfo}" TextWrapping="Wrap" />
+
+                <TextBlock>
+                    <Run FontWeight="Bold">Step 5:</Run>
+                    <Run>Choose a video file to upload.</Run>
+                </TextBlock>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0" Text="{Binding FilePath}" />
+                    <Button Grid.Column="1" Content="Browse..." Command="{Binding BrowseCommand}" />
+                </Grid>
+
+                <Button Content="Upload" Command="{Binding UploadCommand}" />
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Window>

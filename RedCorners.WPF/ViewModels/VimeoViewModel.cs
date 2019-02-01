@@ -1,8 +1,10 @@
-﻿using RedCorners.Vimeo;
+﻿using Microsoft.Win32;
+using RedCorners.Vimeo;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -66,6 +68,17 @@ namespace RedCorners.WPF.ViewModels
             }
         }
 
+        string _filePath;
+        public string FilePath
+        {
+            get => _filePath;
+            private set
+            {
+                _filePath = value;
+                OnPropertyChanged();
+            }
+        }
+
         public string AuthCode { get; set; }
 
         public string Token { get; set; }
@@ -88,6 +101,39 @@ namespace RedCorners.WPF.ViewModels
             set
             {
                 _authorizingVisibility = value;
+                OnPropertyChanged();
+            }
+        }
+
+        Visibility _uploadingVisibility = Visibility.Collapsed;
+        public Visibility UploadVisibility
+        {
+            get => _uploadingVisibility;
+            set
+            {
+                _uploadingVisibility = value;
+                OnPropertyChanged();
+            }
+        }
+
+        bool _isUploadingIndetermined = false;
+        public bool IsUploadingIndetermined
+        {
+            get => _isUploadingIndetermined;
+            set
+            {
+                _isUploadingIndetermined = value;
+                OnPropertyChanged();
+            }
+        }
+
+        int _uploadStep;
+        public int UploadStep
+        {
+            get => _uploadStep;
+            set
+            {
+                _uploadStep = value;
                 OnPropertyChanged();
             }
         }
@@ -171,5 +217,38 @@ namespace RedCorners.WPF.ViewModels
         {
             UserInfo = hook.User.ToString();
         }
+
+        public Command BrowseCommand => new Command(() =>
+        {
+            var dialog = new OpenFileDialog();
+            if (dialog.ShowDialog().GetValueOrDefault())
+                FilePath = dialog.FileName;
+        });
+
+        public Command UploadCommand => new Command(async () =>
+        {
+            if (UploadVisibility == Visibility.Visible) return;
+            if (!File.Exists(FilePath))
+            {
+                MessageBox.Show("File does not exist.");
+            }
+            UploadVisibility = Visibility.Visible;
+            hook.UploadCallback = (f) =>
+            {
+                var progress = (float)f.LastByte / (float)f.ContentSize * 100.0f;
+                UploadStep = (int)progress;
+                if (f.LastByte >= f.ContentSize)
+                {
+                    IsUploadingIndetermined = true;
+                }
+                else
+                {
+                    IsUploadingIndetermined = false;
+                }
+            };
+            await hook.UploadAsync(FilePath);
+            IsUploadingIndetermined = true;
+            UploadVisibility = Visibility.Collapsed;
+        });
     }
 }
