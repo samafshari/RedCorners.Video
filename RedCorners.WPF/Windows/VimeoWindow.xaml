@@ -22,6 +22,9 @@
                         <Style TargetType="TextBlock">
                             <Setter Property="Margin" Value="0,10,0,0" />
                         </Style>
+                        <Style TargetType="ProgressBar">
+                            <Setter Property="Height" Value="20" />
+                        </Style>
                     </ResourceDictionary>
                 </StackPanel.Resources>
             
@@ -88,7 +91,7 @@
                 </Grid>
 
                 <Grid Visibility="{Binding AuthorizingVisibility}">
-                    <ProgressBar IsIndeterminate="True" Height="20" />
+                    <ProgressBar IsIndeterminate="True" />
                 </Grid>
 
                 <TextBlock>
@@ -111,7 +114,17 @@
                     <Button Grid.Column="1" Content="Browse..." Command="{Binding BrowseCommand}" />
                 </Grid>
 
-                <Button Content="Upload" Command="{Binding UploadCommand}" />
+                <Grid>
+                    <Button Content="Upload" Command="{Binding UploadCommand}" />
+                </Grid>
+                <Grid Visibility="{Binding UploadVisibility}">
+                    <ProgressBar Maximum="100" Value="{Binding UploadStep}" IsIndeterminate="{Binding IsUploadingIndeterminate}" />
+                </Grid>
+
+                <TextBlock>
+                    <Run FontWeight="Bold">API Messages:</Run>
+                </TextBlock>
+                <TextBlock TextWrapping="WrapWithOverflow" Text="{Binding ApiMessages}" />
             </StackPanel>
         </ScrollViewer>
     </Grid>

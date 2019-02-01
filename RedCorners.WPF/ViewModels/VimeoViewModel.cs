@@ -72,7 +72,7 @@ namespace RedCorners.WPF.ViewModels
         public string FilePath
         {
             get => _filePath;
-            private set
+            set
             {
                 _filePath = value;
                 OnPropertyChanged();
@@ -116,13 +116,13 @@ namespace RedCorners.WPF.ViewModels
             }
         }
 
-        bool _isUploadingIndetermined = false;
-        public bool IsUploadingIndetermined
+        bool _isUploadingIndeterminate = false;
+        public bool IsUploadingIndeterminate
         {
-            get => _isUploadingIndetermined;
+            get => _isUploadingIndeterminate;
             set
             {
-                _isUploadingIndetermined = value;
+                _isUploadingIndeterminate = value;
                 OnPropertyChanged();
             }
         }
@@ -138,6 +138,17 @@ namespace RedCorners.WPF.ViewModels
             }
         }
 
+        string _apiMessages = "";
+        public string ApiMessages
+        {
+            get => _apiMessages;
+            set
+            {
+                _apiMessages = value;
+                OnPropertyChanged();
+            }
+        }
+
         public VimeoViewModel()
         {
             ClientId = AppSettings.Default.VimeoClientId;
@@ -145,6 +156,12 @@ namespace RedCorners.WPF.ViewModels
             RedirectUrl = AppSettings.Default.VimeoRedirectUrl;
             Token = AppSettings.Default.VimeoToken;
             RegenerateLoginUrl();
+            VimeoHook.VerboseCallback = (s) =>
+            {
+                var msg = s + "\n" + ApiMessages;
+                if (msg.Length > 1000) msg = msg.Substring(0, 1000);
+                ApiMessages = msg;
+            };
         }
 
         void RegenerateLoginUrl()
@@ -239,15 +256,16 @@ namespace RedCorners.WPF.ViewModels
                 UploadStep = (int)progress;
                 if (f.LastByte >= f.ContentSize)
                 {
-                    IsUploadingIndetermined = true;
+                    IsUploadingIndeterminate = true;
                 }
                 else
                 {
-                    IsUploadingIndetermined = false;
+                    IsUploadingIndeterminate = false;
                 }
             };
+            IsUploadingIndeterminate = false;
             await hook.UploadAsync(FilePath);
-            IsUploadingIndetermined = true;
+            IsUploadingIndeterminate = true;
             UploadVisibility = Visibility.Collapsed;
         });
     }
