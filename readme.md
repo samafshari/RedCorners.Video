@@ -1,6 +1,6 @@
-# RedCorners SDK for Vimeo and YouTube
+# RedCorners.Video SDK for Vimeo and YouTube
 
-RedCorners SDK is a wrapper for Vimeo and YouTube APIs, aiming to make the lives of C# developers accessing these platforms easier. The library is .NET Standard 2.0 based, which makes it theoretically compatible with Windows, Mono, .NET Core and Xamarin platforms.
+RedCorners.Video SDK is a wrapper for Vimeo and YouTube APIs, aiming to make the lives of C# developers accessing these platforms easier. The library is .NET Standard 2.0 based, which makes it theoretically compatible with Windows, Mono, .NET Core and Xamarin platforms.
 
 ## NuGet
 [https://www.nuget.org/packages/RedCorners/](https://www.nuget.org/packages/RedCorners/)
@@ -12,10 +12,10 @@ When you create an API App on the Vimeo Developer portal, you receive two values
 
 If you don't have a server that handles redirects for successful authentications, you can set your `RedirectUrl` to `http://ooze.redcorners.com`.
 
-In order to access RedCorners SDK for Vimeo, you need to use the `RedCorners.Vimeo` namespace:
+In order to access RedCorners SDK for Vimeo, you need to use the `RedCorners.Video.Vimeo` namespace:
 
 ```c#
-using RedCorners.Vimeo;
+using RedCorners.Video.Vimeo;
 ```
 
 The OAuth authentication is a three-step process:
@@ -62,7 +62,7 @@ That's it. :)
 
 ### Upload Progress
 
-RedCorners uploads files in chunks. After uploading each chunk, it tries to verify whether the chunk was uploaded successfully. If so, it goes to uploading the next chunks. After all chunks are uploaded, it signals the backend that the file was uploaded and the transcoding can begin.
+RedCorners.Video uploads files in chunks. After uploading each chunk, it tries to verify whether the chunk was uploaded successfully. If so, it goes to uploading the next chunks. After all chunks are uploaded, it signals the backend that the file was uploaded and the transcoding can begin.
 
 The SDK provides a callback through which you can get notified after a chunk is uploaded. You can use it like this:
 
@@ -147,7 +147,7 @@ The only required parameter is `path`, and if no other parameters are assigned, 
 When `step` is `true`, the SDK goes to the **stepped upload** mode, in which it uploads only one chunk, and returns with a `""` result, meaning _the chunk was uploaded successfully but there's still more to upload_.
 
 ### Replacing Existing Videos on Vimeo
-With RedCorners, you can replace an existing video by passing its ID to the `GetTicketAsync` method:
+With RedCorners.Video, you can replace an existing video by passing its ID to the `GetTicketAsync` method:
 
 ```c#
 var ticket = vimeoHook.GetTicket(videoId);

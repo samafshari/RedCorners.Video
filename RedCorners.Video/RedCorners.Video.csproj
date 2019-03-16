@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Version>2.0.1</Version>
+    <Authors>NeatCapital OÜ and Saeed Afshari</Authors>
+    <Product>RedCorners SDK</Product>
+    <Description>RedCorners SDK is a .NET Standard library designed to make it easy to access the Vimeo and YouTube APIs. You can authenticate, upload videos, and call other API endpoints easily with RedCorners SDK.</Description>
+    <Copyright>(c) 2019 NeatCapital OÜ and Saeed Afshari</Copyright>
+    <PackageProjectUrl>http://redcorners.com</PackageProjectUrl>
+    <PackageIconUrl>http://ooze.redcorners.com/logo.png</PackageIconUrl>
+    <PackageTags>Vimeo, YouTube, Upload, Video</PackageTags>
+    <PackageLicenseUrl>http://ooze.redcorners.com/license.txt</PackageLicenseUrl>
+  </PropertyGroup>
+
+</Project>
