@@ -3,7 +3,7 @@
 RedCorners.Video SDK is a wrapper for Vimeo and YouTube APIs, aiming to make the lives of C# developers accessing these platforms easier. The library is .NET Standard 2.0 based, which makes it theoretically compatible with Windows, Mono, .NET Core and Xamarin platforms.
 
 ## NuGet
-[https://www.nuget.org/packages/RedCorners/](https://www.nuget.org/packages/RedCorners/)
+[https://www.nuget.org/packages/RedCorners.Video/](https://www.nuget.org/packages/RedCorners.Video/)
 
 ## Vimeo
 
